@@ -25,6 +25,12 @@ struct line {
   char contents[255];
 };
 
+int cmpfunc (const void * a, const void * b) {
+   return ( *(int*)a - *(int*)b );
+}
+
+
+
 int main(int argc, char *argv[]){
   
   // char c[1000];
@@ -91,10 +97,13 @@ int main(int argc, char *argv[]){
 }
 
 void ProcessFile(FILE* fp, char* filename){
-  // char arr= malloc(10 * sizeof(char));
-  // struct character characters[100];
   struct line lines[255];
+
   int freeSpace = 0;
+
+  int count = 0;
+  char c;
+  char d;
   
   char myString [1000];
   int upper = 0;
@@ -103,37 +112,73 @@ void ProcessFile(FILE* fp, char* filename){
   int bufferLength = 255;
   char buffer[bufferLength];
 
-  // char c;
   int n =0;
   fp = fopen (filename , "r");
-  // printf("First non-space characters encountered:\n");
-  // while(fgets( myString, 1000, fp) != NULL){
-  //   int jj = -1;
-  //   while(++jj < strlen(myString)) {
-  //     if ((c = myString[jj]) != ' ') break;
-  //   }
-  //   // add character STRUCT OBJECT to array
-  //   characters[freeSpace].lineIndex = freeSpace;
-  //   characters[freeSpace].c = c;
 
-  //   freeSpace++;
-  // }
+  // count file lines
+  while(!feof(fp))
+  {
+    d = fgetc(fp);
+    if(d == '\n')
+    {
+      count++;
+    }
+  }
+  while (d != EOF);
+  if(d != '\n' && count != 0)
+    count++;
 
-  // create struct object with each line in input file
-  while(fgets(buffer, bufferLength, fp)) {
-      // printf("%s\n", buffer);
-    strcpy(lines[freeSpace].contents, buffer);
+  printf("The file has %d lines\n ", count); 
+
+  // move file pointer back to beginning of the file
+  rewind(fp);
+  // define line character arrays
+  int characters [count];
+  int copied [count];
+
+  // add each line's first character to comparison array
+  printf("First non-space characters encountered:\n");
+  while(fgets( myString, 1000, fp) != NULL){
+    int jj = -1;
+    while(++jj < strlen(myString)) {
+      if ((c = myString[jj]) != ' ') break;
+    }
+
+    // add character to array
+    characters[freeSpace]=  (int)c;
     freeSpace++;
   }
-
   fclose (fp);
 
-  // // test iteration over characters struct
-  // for (int i = 0; i< 3; i++){
-  //   printf("%s \n", lines[i].contents);
+  // // test iteration over characters arr
+  // for (int i = 0; i< 8; i++){
+  //   printf("%c \n", characters[i]);
   // }
 
+  // copy character array
+  for (int i = 0; i< count; i++){
+    // printf("%c \n", characters[i]);
+    copied[i] = characters[i];
+  }
+
+  printf("original -> copied \n");
   
+  // copy array
+  for(int loop = 0; loop < count; loop++) {
+    printf("   %2d        %2d\n", characters[loop], copied[loop]);
+  }
+
+  // sort copied arr by first character of contents
+  qsort(copied, count, sizeof(int), cmpfunc);
+  
+  // print new order
+  printf("\nAfter sorting the list is: \n");
+  for( n = 0 ; n < count; n++ ) {   
+    printf("%d ", copied[n]);
+  }
+
+  // build new string order 
+
 
   // return char array
 
