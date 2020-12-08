@@ -7,6 +7,12 @@
 
 enum { MAXL = 40, MAXC = 50 };
 
+// enum { 
+//   A = 130, 
+//   B = 131,
+//   C = 
+// }
+
 
 // rules
 
@@ -16,7 +22,7 @@ enum { MAXL = 40, MAXC = 50 };
 
 // sort -r: Reverse the sorting order.
 // sort -o: Specify the output file.
-// sort -n: Use the numerical value to sort.
+// sort -n: Use the numerical value to sort. e.g a list > names.txt
 // sort -h: option that outputs usage information and briefly explains how much of this part of the coursework you have managed to implement.
 
 // uses qsort() to actually sort
@@ -29,29 +35,28 @@ enum { MAXL = 40, MAXC = 50 };
 // };
 
 int cmpfunc (const void * a, const void * b) {
-  const char * pa = (const char *) a;
-  const char * pb = (const char *) b;
-  // printf("%c\n", pa[0]);
-  // printf("%c\n", pb[0]);
+  // const char * pa = (const char *) a;
+  // const char * pb = (const char *) b;
+  // return ( (int)pa[0] - (int)pb[0] );
+  const char* aa = (const char*)a;
+  const char* bb = (const char*)b;
+  return strcasecmp(aa, bb);
+}
 
-  return ( (int)pa[0] - (int)pb[0] );
+int reversecmpfunc (const void * a, const void * b) {
+  const char* aa = (const char*)a;
+  const char* bb = (const char*)b;
+  return strcasecmp(bb, aa);
+
 }
 
 
 
 int main(int argc, char *argv[]){
-  
-  // char c[1000];
-  // int bufferLength = 255;
-  // char buffer[bufferLength];
+  char (*lines)[MAXC] = NULL; 
+  char sortType = 'd';
+  char outputType = 'c';
   FILE *fp;
-
-  // if (argc == 1){
-  //   // file not specified
-  //   printf("Error! opening file");
-  //   return 1;
-  // }
-  
 
   // iterate through arguments
 
@@ -65,19 +70,30 @@ int main(int argc, char *argv[]){
         
         case 'h': 
           printf("\noption h is found\n\n");
+          // if file specified, process & sort using default
+          // display usage info
           // displayUsageInfo();
+
           break;
 
         case 'o': 
+          outputType = 'f';
           printf("\noption o is found\n\n");
+          // process & sort
+
+          // write to specified file (if possible, else create new file and output to there????)
           break;          
         
-        case 'n': 
+        case 'n':
+          sortType = 'n'; 
           printf("\noption n is found\n\n");
+          // process & sort using numerical compare function????
           break;          
 
         case 'r': 
+          sortType = 'r';
           printf("\noption r is found\n\n");
+          // process & sort using reversed compare function
           break;
       }
     }
@@ -91,19 +107,12 @@ int main(int argc, char *argv[]){
     // Program exits if file pointer returns NULL.
     return 1;
   }else{
-    // store first character of each line in an array
-    ProcessFileAlt(fp, argv[-1]);
-    
-    // WE ALSO NEED A WAY TO REMEMBER WHICH CHARACTER BELONGS TO WHICH LINE AS WE CURRENTLY DO NOT HAVE THIS INFORMATION
-    // MAYBE WE NEED A STRUCT? FOR EACH CHARACTER WE HAVE AN ORIGINAL LINE INDEX FOR WHICH LINE IT BEGINS TO?????
-    // sort array using the rules (qsort())
-
-    // print entire file contents in correct sorting order based on the sorted array we have created. 
-
+    // process file
+    ProcessFileAlt(fp, argv[-1], sortType, outputType);
     return 0;
     }
 }
-void ProcessFileAlt(FILE* fp, char* filename){
+void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType){
   char (*lines)[MAXC] = NULL; /* pointer to array of type char [MAXC] */
   
   int i, n = 0, maxl = MAXL;
@@ -140,12 +149,32 @@ void ProcessFileAlt(FILE* fp, char* filename){
 
   free (lines);   /* free allocated memory */
 
-  /* sort array by first character */
-  qsort(lines, n, sizeof(char) * MAXC, cmpfunc);
 
-  /* print lines */
-  printf("Sorted array: \n");
-  for (i = 0; i < n; i++) printf (" line[%2d] : '%s'\n", i + 1, lines[i]);
+  // choose sort type
+  switch(sortType){
+    // default comparison method
+    default: 
+      qsort(lines, n, sizeof(*lines), cmpfunc);
+      break;
+
+    // numerical
+    case 'n':
+      break;
+
+    // reverse
+    case 'r':
+      qsort(lines, n, sizeof(char) * MAXC, reversecmpfunc);
+      break;
+  }
+
+  // if file output
+  if(outputType == 'f'){
+    // file output logic
+  }else{
+    /* print lines */
+    printf("Sorted array: \n");
+    for (i = 0; i < n; i++) printf (" line[%2d] : '%s'\n", i + 1, lines[i]);
+  }
 
 
 
