@@ -5,6 +5,9 @@
 
 #include "sort.h"
 
+enum { MAXL = 40, MAXC = 50 };
+
+
 // rules
 
 // Lines starting with a number will appear before lines starting with a letter.
@@ -21,12 +24,17 @@
 // must use switch case to choose arguments. 
 
 
-struct line {
-  char contents[255];
-};
+// struct line {
+//   char contents[255];
+// };
 
 int cmpfunc (const void * a, const void * b) {
-   return ( *(int*)a - *(int*)b );
+  const char * pa = (const char *) a;
+  const char * pb = (const char *) b;
+  // printf("%c\n", pa[0]);
+  // printf("%c\n", pb[0]);
+
+  return ( (int)pa[0] - (int)pb[0] );
 }
 
 
@@ -34,8 +42,8 @@ int cmpfunc (const void * a, const void * b) {
 int main(int argc, char *argv[]){
   
   // char c[1000];
-  int bufferLength = 255;
-  char buffer[bufferLength];
+  // int bufferLength = 255;
+  // char buffer[bufferLength];
   FILE *fp;
 
   // if (argc == 1){
@@ -84,7 +92,7 @@ int main(int argc, char *argv[]){
     return 1;
   }else{
     // store first character of each line in an array
-    ProcessFile(fp, argv[-1]);
+    ProcessFileAlt(fp, argv[-1]);
     
     // WE ALSO NEED A WAY TO REMEMBER WHICH CHARACTER BELONGS TO WHICH LINE AS WE CURRENTLY DO NOT HAVE THIS INFORMATION
     // MAYBE WE NEED A STRUCT? FOR EACH CHARACTER WE HAVE AN ORIGINAL LINE INDEX FOR WHICH LINE IT BEGINS TO?????
@@ -95,87 +103,138 @@ int main(int argc, char *argv[]){
     return 0;
     }
 }
+void ProcessFileAlt(FILE* fp, char* filename){
+  char (*lines)[MAXC] = NULL; /* pointer to array of type char [MAXC] */
+  
+  int i, n = 0, maxl = MAXL;
 
+
+  if (!(lines = malloc (MAXL * sizeof *lines))) { /* allocate MAXL arrays */
+      fprintf (stderr, "error: virtual memory exhausted 'lines'.\n");
+  }
+
+  while (n < MAXL && fgets (lines[n], MAXC, fp)) { /* read each line */
+      char *p = lines[n];                  /* assign pointer */
+      for (; *p && *p != '\n'; p++) {}     /* find 1st '\n'  */
+      if (*p != '\n') {                   /* check line read */
+            int c;  /* discard remainder of line with getchar  */
+            while ((c = fgetc (fp)) != '\n' && c != EOF) {}
+        }
+      // *p = 0, n++;
+      *p = 0;                              /* nul-termiante  */
+      if (++n == maxl) { /* if limit reached, realloc lines  */
+          void *tmp = realloc (lines, 2 * maxl * sizeof *lines);
+          if (!tmp) {     /* validate realloc succeeded */
+              fprintf (stderr, "error: realloc - virtual memory exhausted.\n");
+              break;      /* on failure, exit with existing data */
+          }
+          lines = tmp;    /* assign reallocated block to lines */
+          maxl *= 2;      /* update maxl to reflect new size */
+      }                         /* nul-termiante  */
+  }
+  if (fp != stdin) fclose (fp);   /* close file if not stdin */
+
+  /* print lines */
+  printf("Original array: \n");
+  for (i = 0; i < n; i++) printf (" line[%2d] : '%s'\n", i + 1, lines[i]);
+
+  free (lines);   /* free allocated memory */
+
+  /* sort array by first character */
+  qsort(lines, n, sizeof(char) * MAXC, cmpfunc);
+
+  /* print lines */
+  printf("Sorted array: \n");
+  for (i = 0; i < n; i++) printf (" line[%2d] : '%s'\n", i + 1, lines[i]);
+
+
+
+
+}
 void ProcessFile(FILE* fp, char* filename){
-  struct line lines[255];
 
   int freeSpace = 0;
 
   int count = 0;
   char c;
-  char d;
+  // char d;  
   
-  char myString [1000];
-  int upper = 0;
-  int lower = 0;
 
-  int bufferLength = 255;
-  char buffer[bufferLength];
+  // int bufferLength = 256;
+  char buffer[256];
 
   int n =0;
   fp = fopen (filename , "r");
 
-  // count file lines
-  while(!feof(fp))
-  {
-    d = fgetc(fp);
-    if(d == '\n')
-    {
-      count++;
-    }
-  }
-  while (d != EOF);
-  if(d != '\n' && count != 0)
-    count++;
+  // // count file lines
+  // while(!feof(fp))
+  // {
+  //   d = fgetc(fp);
+  //   if(d == '\n')
+  //   {
+  //     count++;
+  //   }
+  // }
+  // while (d != EOF);
+  // if(d != '\n' && count != 0)
+  //   count++;
 
-  printf("The file has %d lines\n ", count); 
+  // printf("The file has %d lines\n", count); 
+  printf("test");
 
   // move file pointer back to beginning of the file
   rewind(fp);
+  // fclose (fp);
+
+  // fp = fopen (filename , "r");
+
+
   // define line character arrays
-  int characters [count];
-  int copied [count];
+  char *lines[1000];
 
-  // add each line's first character to comparison array
-  printf("First non-space characters encountered:\n");
-  while(fgets( myString, 1000, fp) != NULL){
-    int jj = -1;
-    while(++jj < strlen(myString)) {
-      if ((c = myString[jj]) != ' ') break;
-    }
+  int i = 0;
 
-    // add character to array
-    characters[freeSpace]=  (int)c;
+  while(fgets(buffer, sizeof(buffer), fp)) {
+    i++;
+    printf("i: %d", i);
+    printf("%s\n", buffer);
+    strcpy(lines[freeSpace], buffer);
     freeSpace++;
   }
+  
+
   fclose (fp);
 
-  // // test iteration over characters arr
-  // for (int i = 0; i< 8; i++){
-  //   printf("%c \n", characters[i]);
+  printf("test");
+
+  // test iteration over characters arr
+  // for (int j = 0; j< sizeof(lines); i++){
+  //   printf("%s \n", lines[j]);
   // }
 
-  // copy character array
-  for (int i = 0; i< count; i++){
-    // printf("%c \n", characters[i]);
-    copied[i] = characters[i];
-  }
+  // // copy character array
+  // for (int i = 0; i< count; i++){
+  //   // printf("%c \n", characters[i]);
+  //   copied[i] = characters[i];
+  // }
 
-  printf("original -> copied \n");
+  // printf("original -> copied \n");
   
-  // copy array
-  for(int loop = 0; loop < count; loop++) {
-    printf("   %2d        %2d\n", characters[loop], copied[loop]);
-  }
+  // // copy array
+  // for(int loop = 0; loop < count; loop++) {
+  //   printf("   %2d        %2d\n", characters[loop], copied[loop]);
+  // }
 
   // sort copied arr by first character of contents
-  qsort(copied, count, sizeof(int), cmpfunc);
+  // qsort(copied, count, sizeof(int), cmpfunc);
+
+  // qsort(lines, count, 256, cmpfunc);
   
-  // print new order
-  printf("\nAfter sorting the list is: \n");
-  for( n = 0 ; n < count; n++ ) {   
-    printf("%d ", copied[n]);
-  }
+  // // print new order
+  // printf("\nAfter sorting the list is: \n");
+  // for( n = 0 ; n < count; n++ ) {   
+  //   printf("%d ", copied[n]);
+  // }
 
   // build new string order 
 
