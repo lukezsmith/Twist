@@ -7,13 +7,6 @@
 
 enum { MAXL = 40, MAXC = 50 };
 
-// enum { 
-//   A = 130, 
-//   B = 131,
-//   C = 
-// }
-
-
 // rules
 
 // Lines starting with a number will appear before lines starting with a letter.
@@ -29,33 +22,71 @@ enum { MAXL = 40, MAXC = 50 };
 
 // must use switch case to choose arguments. 
 
-
-// struct line {
-//   char contents[255];
-// };
-
 int cmpfunc (const void * a, const void * b) {
-  // const char * pa = (const char *) a;
-  // const char * pb = (const char *) b;
-  // return ( (int)pa[0] - (int)pb[0] );
   const char* aa = (const char*)a;
   const char* bb = (const char*)b;
-  return strcasecmp(aa, bb);
+
+    int ca, cb;
+  do {
+     ca = (unsigned char) *aa++;
+     cb = (unsigned char) *bb++;
+     ca = tolower(toupper(ca));
+     cb = tolower(toupper(cb));
+   } while (ca == cb && ca != '\0');
+   return ca - cb;
+  // return strcasecmp(aa, bb);
+  
+
 }
 
 int reversecmpfunc (const void * a, const void * b) {
+  // const char* aa = (const char*)a;
+  // const char* bb = (const char*)b;
+  // return strcasecmp(bb, aa);
   const char* aa = (const char*)a;
   const char* bb = (const char*)b;
-  return strcasecmp(bb, aa);
 
+    int ca, cb;
+  do {
+     ca = (unsigned char) *aa++;
+     cb = (unsigned char) *bb++;
+     ca = tolower(toupper(ca));
+     cb = tolower(toupper(cb));
+   } while (ca == cb && ca != '\0');
+   return cb - ca;
 }
 
+int numbercmpfunc(const void * a, const void * b) {
+  char* ptra;
+  char* ptrb;
+  const char* aa = (const char*)a;
+  const char* bb = (const char*)b;
 
+  long reta = strtol(aa, &ptra, 10);
+  long retb = strtol(bb, &ptrb, 10);
+
+  // return smallest of these
+  return ( (int)reta - (int)retb );
+}
+
+int reversenumbercmpfunc(const void * a, const void * b) {
+  char* ptra;
+  char* ptrb;
+  const char* aa = (const char*)a;
+  const char* bb = (const char*)b;
+
+  long reta = strtol(aa, &ptra, 10);
+  long retb = strtol(bb, &ptrb, 10);
+
+  // return smallest of these
+  return ( (int)retb - (int)reta );
+} 
 
 int main(int argc, char *argv[]){
   char (*lines)[MAXC] = NULL; 
   char sortType = 'd';
   char outputType = 'c';
+  int reverse = 0;
   FILE *fp;
 
   // iterate through arguments
@@ -69,7 +100,6 @@ int main(int argc, char *argv[]){
           return 1;
         
         case 'h': 
-          printf("\noption h is found\n\n");
           // if file specified, process & sort using default
           // display usage info
           // displayUsageInfo();
@@ -78,7 +108,6 @@ int main(int argc, char *argv[]){
 
         case 'o': 
           outputType = 'f';
-          printf("\noption o is found\n\n");
           // process & sort
 
           // write to specified file (if possible, else create new file and output to there????)
@@ -86,18 +115,19 @@ int main(int argc, char *argv[]){
         
         case 'n':
           sortType = 'n'; 
-          printf("\noption n is found\n\n");
           // process & sort using numerical compare function????
           break;          
 
         case 'r': 
-          sortType = 'r';
-          printf("\noption r is found\n\n");
+          reverse = 1;
           // process & sort using reversed compare function
           break;
       }
     }
   }
+  // printf("n.o arguments: %d", argc);
+  // if(argc < 2)
+
 
   // default (no arguments) implementation
 
@@ -108,11 +138,12 @@ int main(int argc, char *argv[]){
     return 1;
   }else{
     // process file
-    ProcessFileAlt(fp, argv[-1], sortType, outputType);
+    ProcessFileAlt(fp, argv[-1], sortType, outputType, reverse);
     return 0;
     }
 }
-void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType){
+
+void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType, int reverse){
   char (*lines)[MAXC] = NULL; /* pointer to array of type char [MAXC] */
   
   int i, n = 0, maxl = MAXL;
@@ -154,17 +185,24 @@ void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType){
   switch(sortType){
     // default comparison method
     default: 
-      qsort(lines, n, sizeof(*lines), cmpfunc);
-      break;
+      // check if reversed
+      if (reverse == 0){
+        qsort(lines, n, sizeof(*lines), cmpfunc);
+        break;
+      }else{
+        qsort(lines, n, sizeof(*lines), reversecmpfunc);
+        break; 
+      }
 
     // numerical
     case 'n':
-      break;
-
-    // reverse
-    case 'r':
-      qsort(lines, n, sizeof(char) * MAXC, reversecmpfunc);
-      break;
+      if (reverse == 0){
+        qsort(lines, n, sizeof(*lines), numbercmpfunc);
+        break;
+      }else{
+        qsort(lines, n, sizeof(*lines), reversenumbercmpfunc);
+        break;  
+      }
   }
 
   // if file output
@@ -175,103 +213,4 @@ void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType){
     printf("Sorted array: \n");
     for (i = 0; i < n; i++) printf (" line[%2d] : '%s'\n", i + 1, lines[i]);
   }
-
-
-
-
-}
-void ProcessFile(FILE* fp, char* filename){
-
-  int freeSpace = 0;
-
-  int count = 0;
-  char c;
-  // char d;  
-  
-
-  // int bufferLength = 256;
-  char buffer[256];
-
-  int n =0;
-  fp = fopen (filename , "r");
-
-  // // count file lines
-  // while(!feof(fp))
-  // {
-  //   d = fgetc(fp);
-  //   if(d == '\n')
-  //   {
-  //     count++;
-  //   }
-  // }
-  // while (d != EOF);
-  // if(d != '\n' && count != 0)
-  //   count++;
-
-  // printf("The file has %d lines\n", count); 
-  printf("test");
-
-  // move file pointer back to beginning of the file
-  rewind(fp);
-  // fclose (fp);
-
-  // fp = fopen (filename , "r");
-
-
-  // define line character arrays
-  char *lines[1000];
-
-  int i = 0;
-
-  while(fgets(buffer, sizeof(buffer), fp)) {
-    i++;
-    printf("i: %d", i);
-    printf("%s\n", buffer);
-    strcpy(lines[freeSpace], buffer);
-    freeSpace++;
-  }
-  
-
-  fclose (fp);
-
-  printf("test");
-
-  // test iteration over characters arr
-  // for (int j = 0; j< sizeof(lines); i++){
-  //   printf("%s \n", lines[j]);
-  // }
-
-  // // copy character array
-  // for (int i = 0; i< count; i++){
-  //   // printf("%c \n", characters[i]);
-  //   copied[i] = characters[i];
-  // }
-
-  // printf("original -> copied \n");
-  
-  // // copy array
-  // for(int loop = 0; loop < count; loop++) {
-  //   printf("   %2d        %2d\n", characters[loop], copied[loop]);
-  // }
-
-  // sort copied arr by first character of contents
-  // qsort(copied, count, sizeof(int), cmpfunc);
-
-  // qsort(lines, count, 256, cmpfunc);
-  
-  // // print new order
-  // printf("\nAfter sorting the list is: \n");
-  // for( n = 0 ; n < count; n++ ) {   
-  //   printf("%d ", copied[n]);
-  // }
-
-  // build new string order 
-
-
-  // return char array
-
-  // return characters;
-
-  // return str;
-
 }
