@@ -4,6 +4,7 @@
 #include"connect4.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 struct board_structure {
   // row x column array?
@@ -35,7 +36,7 @@ board setup_board(){
   // B = malloc(sizeof(board));
   // printf("Board structure: \n");
   // // printf("%s\n", B.rows[0]);
-  for (int i = 0; i < initialSize; i++) printf ("%s\n", B->rows[i]);
+  // for (int i = 0; i < initialSize; i++) printf ("%s\n", B->rows[i]);
 
 
   // return board address
@@ -48,6 +49,80 @@ board setup_board(){
 // }
 
 void read_in_file(FILE *infile, board u){
+  char buffer[1024];
+  char line[512];
+  int n = 0;
+  int lineLength = 0;
+  // get first line length and check not less than 3 or greater than 512
+  // fscanf(infile, "%[^\n]", line);
+  // lineLength = strlen(line);
+  // if (lineLength <4 || lineLength > 512){
+  //   // invalid file error handling
+  //   printf("Invalid board size");
+  //   return;
+  // }
+  // // rewind file pointer
+  // rewind(infile);
+
+  // populate board
+
+  // while(fgets(buffer, 1024, infile))
+  // {
+  //     n++;
+  //     u->rows[n] = atoi('xxxxxxxx');
+  // }
+  int maxl = 4;
+  int maxc = 512;
+   
+  char (*lines)[maxc] = NULL; /* pointer to array of type char [MAXC] */
+
+  if (!(lines = malloc (maxl * sizeof *lines))) { /* allocate MAXL arrays */
+    fprintf (stderr, "error: virtual memory exhausted 'lines'.\n");
+  }
+  while (n < maxl && fgets (lines[n], maxc, infile)) { /* read each line */
+      // get and check line length
+      if (n == 0){
+        lineLength = strlen(lines[n]) -1 ;
+
+        if (lineLength <4 || lineLength > 512){
+          // invalid file error handling
+          printf("Invalid board size\n");
+          return;
+        }          
+      }
+
+      // check all lines are same length
+      if (strlen(lines[n])-1 != lineLength){
+          printf("Invalid board size\n");
+          return;
+      }
+      char *p = lines[n];                  /* assign pointer */
+      for (; *p && *p != '\n'; p++) {}     /* find 1st '\n'  */
+      if (*p != '\n') {                   /* check line read */
+            int c;  /* discard remainder of line with getchar  */
+            while ((c = fgetc (infile)) != '\n' && c != EOF) {}
+        }
+      // *p = 0, n++;
+      *p = 0;                              /* nul-termiante  */
+      if (++n == maxl) { /* if limit reached, realloc lines  */
+          void *tmp = realloc (lines, 2 * maxl * sizeof *lines);
+          if (!tmp) {     /* validate realloc succeeded */
+              fprintf (stderr, "error: realloc - virtual memory exhausted.\n");
+              break;      /* on failure, exit with existing data */
+          }
+          lines = tmp;    /* assign reallocated block to lines */
+          maxl *= 2;      /* update maxl to reflect new size */
+      }                         /* nul-termiante  */
+  }
+  if (infile != stdin) fclose (infile);   /* close file if not stdin */
+  // printf("N.o lines: %d\n", n);
+  /* print lines */
+  // printf("Original array: \n");
+  for (int i = 0; i < n; i++) printf ("%s\n", lines[i]);
+  
+  free (lines);   /* free allocated memory */
+  // check board
+  // for (int i = 0; i < n; i++) printf ("%s\n", u->rows[i]);
   // iterate through input file inserting each line to respective board row
 
 
