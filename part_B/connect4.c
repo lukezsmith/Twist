@@ -9,7 +9,9 @@
 struct board_structure {
   // row x column array?
   // int board[1][1];
-  char **rows;
+  // char **rows;
+  char (*rows)[512];
+  // char *rows[512];
   // n.o rows
   int height;
   // n.o columns
@@ -49,28 +51,8 @@ board setup_board(){
 // }
 
 void read_in_file(FILE *infile, board u){
-  char buffer[1024];
-  char line[512];
   int n = 0;
   int lineLength = 0;
-  // get first line length and check not less than 3 or greater than 512
-  // fscanf(infile, "%[^\n]", line);
-  // lineLength = strlen(line);
-  // if (lineLength <4 || lineLength > 512){
-  //   // invalid file error handling
-  //   printf("Invalid board size");
-  //   return;
-  // }
-  // // rewind file pointer
-  // rewind(infile);
-
-  // populate board
-
-  // while(fgets(buffer, 1024, infile))
-  // {
-  //     n++;
-  //     u->rows[n] = atoi('xxxxxxxx');
-  // }
   int maxl = 4;
   int maxc = 512;
    
@@ -83,6 +65,8 @@ void read_in_file(FILE *infile, board u){
       // get and check line length
       if (n == 0){
         lineLength = strlen(lines[n]) -1 ;
+        printf("line length: %d\n", lineLength);
+        u->width = lineLength;
 
         if (lineLength <4 || lineLength > 512){
           // invalid file error handling
@@ -115,17 +99,18 @@ void read_in_file(FILE *infile, board u){
       }                         /* nul-termiante  */
   }
   if (infile != stdin) fclose (infile);   /* close file if not stdin */
-  // printf("N.o lines: %d\n", n);
-  /* print lines */
-  // printf("Original array: \n");
-  for (int i = 0; i < n; i++) printf ("%s\n", lines[i]);
+
+  // set board height
+  u->height = n;
+
+  // set board rows
+  u->rows = lines;
+
+  // board check
+  printf("board dim: %dx%d\n", u->width, u->height);
+  for (int i = 0; i < n; i++) printf ("%s\n", u->rows[i]);
   
   free (lines);   /* free allocated memory */
-  // check board
-  // for (int i = 0; i < n; i++) printf ("%s\n", u->rows[i]);
-  // iterate through input file inserting each line to respective board row
-
-
 }
 
 // void write_out_file(FILE *outfile, board u){
