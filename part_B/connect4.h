@@ -10,9 +10,9 @@ board setup_board();
 // void cleanup_board(board u);
 
 void read_in_file(FILE *infile, board u);
-// void write_out_file(FILE *outfile, board u);
+void write_out_file(FILE *outfile, board u);
 
-// struct move read_in_move(board u);
+struct move read_in_move(board u);
 // int is_valid_move(struct move m, board u);
 // char is_winning_move(struct move m, board u);
 // void play_move(struct move m, board u);

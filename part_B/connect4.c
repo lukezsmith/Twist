@@ -77,6 +77,7 @@ void read_in_file(FILE *infile, board u){
 
       // check all lines are same length
       if (strlen(lines[n])-1 != lineLength){
+          printf("Curr line length: %d\n", strlen(lines[n]-1));
           printf("Invalid board size\n");
           return;
       }
@@ -107,14 +108,85 @@ void read_in_file(FILE *infile, board u){
   u->rows = lines;
 
   // board check
-  printf("board dim: %dx%d\n", u->width, u->height);
-  for (int i = 0; i < n; i++) printf ("%s\n", u->rows[i]);
+  // printf("board dim: %dx%d\n", u->width, u->height);
+  // iterate by row x col rather than just row
+  // for (int i = 0; i < n; i++) printf ("%c\n", u->rows[i][7]);
   
   free (lines);   /* free allocated memory */
 }
 
-// void write_out_file(FILE *outfile, board u){
-// //You may put code here
+void write_out_file(FILE *outfile, board u){
+  // write board rows to the outfile
+  // for (int i = 0; i < sizeof(u->rows); i++){
+    // check string for four consecutive tokens
+    // char *line = checkRow(u->rows[i]);
+    // fprintf (outfile, "%s\n", line);
+    // fprintf (outfile, "%s\n", u->rows[i]);
+
+  // horizontalCheck 
+    for (int j = 0; j<u->height-3 ; j++ ){
+        for (int i = 0; i<u->width; i++){
+            if (u->rows[i][j] == 'o' && u->rows[i][j+1] =='o' && u->rows[i][j+2] == 'o' && u->rows[i][j+3] == 'o'){
+                printf("HORIZONTAL WIN!!");
+            }           
+        }
+    }
+    // verticalCheck
+    for (int i = 0; i<u->width-3 ; i++ ){
+        for (int j = 0; j<u->height; j++){
+            if (u->rows[i][j] == 'o' && u->rows[i+1][j] == 'o' && u->rows[i+2][j] == 'o' && u->rows[i+3][j] == 'o'){
+              printf("VERTICAL WIN!!");
+            }           
+        }
+    }
+    // ascendingDiagonalCheck 
+    for (int i=3; i<u->width; i++){
+        for (int j=0; j<u->height-3; j++){
+            if (u->rows[i][j] == 'o' && u->rows[i-1][j+1] == 'o' && u->rows[i-2][j+2] == 'o' && u->rows[i-3][j+3] == 'o')
+                printf("DIAGONAL WIN!!");
+        }
+    }
+  // }
+  fclose(outfile);
+
+  // need logic to capitalise four consecutive symbols
+  // if more than two winning combinations, simply capitalise one combination (arbitrarily)
+
+}
+
+// boolean areFourConnected(int player){
+
+//     // horizontalCheck 
+//     for (int j = 0; j<getHeight()-3 ; j++ ){
+//         for (int i = 0; i<getWidth(); i++){
+//             if (this.board[i][j] == player && this.board[i][j+1] == player && this.board[i][j+2] == player && this.board[i][j+3] == player){
+//                 return true;
+//             }           
+//         }
+//     }
+//     // verticalCheck
+//     for (int i = 0; i<getWidth()-3 ; i++ ){
+//         for (int j = 0; j<this.getHeight(); j++){
+//             if (this.board[i][j] == player && this.board[i+1][j] == player && this.board[i+2][j] == player && this.board[i+3][j] == player){
+//                 return true;
+//             }           
+//         }
+//     }
+//     // ascendingDiagonalCheck 
+//     for (int i=3; i<getWidth(); i++){
+//         for (int j=0; j<getHeight()-3; j++){
+//             if (this.board[i][j] == player && this.board[i-1][j+1] == player && this.board[i-2][j+2] == player && this.board[i-3][j+3] == player)
+//                 return true;
+//         }
+//     }
+//     // descendingDiagonalCheck
+//     for (int i=3; i<getWidth(); i++){
+//         for (int j=3; j<getHeight(); j++){
+//             if (this.board[i][j] == player && this.board[i-1][j-1] == player && this.board[i-2][j-2] == player && this.board[i-3][j-3] == player)
+//                 return true;
+//         }
+//     }
+//     return false;
 // }
 
 // char next_player(board u){
