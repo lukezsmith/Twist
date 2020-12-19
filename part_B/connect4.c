@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 struct board_structure {
   // row x column array?
@@ -124,70 +125,94 @@ void write_out_file(FILE *outfile, board u){
     // fprintf (outfile, "%s\n", u->rows[i]);
 
   // horizontalCheck 
-    for (int j = 0; j<u->height-3 ; j++ ){
-        for (int i = 0; i<u->width; i++){
-            if (u->rows[i][j] == 'o' && u->rows[i][j+1] =='o' && u->rows[i][j+2] == 'o' && u->rows[i][j+3] == 'o'){
-                printf("HORIZONTAL WIN!!");
+  // for each symbol
+  char symbols[] =  {'x', 'o'};
+  printf("board dims: %dx%d\n", u->width, u->height);
+  printf("board size: %d\n", sizeof(u->rows));
+  for (int i = 0; i < sizeof(u->rows); i++){
+    printf ("%s\n", u->rows[i]);
+  }
+
+
+  for (int k = 0; k < 2; k++){
+    for (int j = 0; j<u->width-3 ; j++ ){
+        for (int i = 0; i<u->height; i++){
+            if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
+                printf("HORIZONTAL WIN!!\n");
+                // capitalise o's
+                u->rows[i][j] = toupper(symbols[k]);
+                u->rows[i][j+1] = toupper(symbols[k]);
+                u->rows[i][j+2] = toupper(symbols[k]);
+                u->rows[i][j+3] = toupper(symbols[k]);
+                for (int i = 0; i < sizeof(u->rows); i++){
+                    fprintf (outfile, "%s\n", u->rows[i]);
+                }
+                fclose(outfile);
+                return;
             }           
         }
     }
     // verticalCheck
-    for (int i = 0; i<u->width-3 ; i++ ){
-        for (int j = 0; j<u->height; j++){
-            if (u->rows[i][j] == 'o' && u->rows[i+1][j] == 'o' && u->rows[i+2][j] == 'o' && u->rows[i+3][j] == 'o'){
-              printf("VERTICAL WIN!!");
+    for (int i = 0; i<u->height-3; i++ ){
+        for (int j = 0; j<u->width; j++){
+            if (u->rows[i][j] == symbols[k] && u->rows[i+1][j] == symbols[k] && u->rows[i+2][j] == symbols[k] && u->rows[i+3][j] == symbols[k]){
+                printf("VERTICAL WIN!!\n");
+                printf("i: %d, j: %d\n", i, j);
+                printf("i: %d, j: %d\n", i+1, j);
+                printf("i: %d, j: %d\n", i+2, j);
+                printf("i: %d, j: %d\n", i+3, j);
+                // capitalise o's
+                u->rows[i][j] = toupper(symbols[k]);
+                u->rows[i+1][j] = toupper(symbols[k]);
+                u->rows[i+2][j] = toupper(symbols[k]);
+                u->rows[i+3][j] = toupper(symbols[k]);
+                for (int i = 0; i < sizeof(u->rows); i++){
+                    fprintf (outfile, "%s\n", u->rows[i]);
+                }
+                fclose(outfile);
+                return;
             }           
         }
     }
     // ascendingDiagonalCheck 
-    for (int i=3; i<u->width; i++){
-        for (int j=0; j<u->height-3; j++){
-            if (u->rows[i][j] == 'o' && u->rows[i-1][j+1] == 'o' && u->rows[i-2][j+2] == 'o' && u->rows[i-3][j+3] == 'o')
-                printf("DIAGONAL WIN!!");
+    for (int i=3; i<u->height; i++){
+        for (int j=0; j<u->width-3; j++){
+            if (u->rows[i][j] == symbols[k] && u->rows[i-1][j+1] == symbols[k] && u->rows[i-2][j+2] == symbols[k] && u->rows[i-3][j+3] == symbols[k]){
+                printf("DIAGONAL (asc) WIN!!\n");
+                // capitalise o's
+                u->rows[i][j] = toupper(symbols[k]);
+                u->rows[i-1][j+1] = toupper(symbols[k]);
+                u->rows[i-2][j+2] = toupper(symbols[k]);
+                u->rows[i-3][j+3] = toupper(symbols[k]);
+                for (int i = 0; i < sizeof(u->rows); i++){
+                    fprintf (outfile, "%s\n", u->rows[i]);
+                }
+                fclose(outfile);
+                return;
+            }
         }
     }
-  // }
-  fclose(outfile);
-
-  // need logic to capitalise four consecutive symbols
-  // if more than two winning combinations, simply capitalise one combination (arbitrarily)
+        // descendingDiagonalCheck
+    for (int i=3; i<u->height; i++){
+        for (int j=3; j< u->width; j++){
+            if (u->rows[i][j] == symbols[k] && u->rows[i-1][j-1] == symbols[k] && u->rows[i-2][j-2] ==symbols[k] && u->rows[i-3][j-3] == symbols[k]){
+                printf("DIAGONAL (desc) WIN!!\n");
+                // capitalise o's
+                u->rows[i][j] = toupper(symbols[k]);
+                u->rows[i-1][j-1] = toupper(symbols[k]);
+                u->rows[i-2][j-2] = toupper(symbols[k]);
+                u->rows[i-3][j-3] = toupper(symbols[k]);
+                for (int i = 0; i < sizeof(u->rows); i++){
+                    fprintf (outfile, "%s\n", u->rows[i]);
+                }
+                fclose(outfile);
+                return;              
+            }
+        }
+    }
+  }
 
 }
-
-// boolean areFourConnected(int player){
-
-//     // horizontalCheck 
-//     for (int j = 0; j<getHeight()-3 ; j++ ){
-//         for (int i = 0; i<getWidth(); i++){
-//             if (this.board[i][j] == player && this.board[i][j+1] == player && this.board[i][j+2] == player && this.board[i][j+3] == player){
-//                 return true;
-//             }           
-//         }
-//     }
-//     // verticalCheck
-//     for (int i = 0; i<getWidth()-3 ; i++ ){
-//         for (int j = 0; j<this.getHeight(); j++){
-//             if (this.board[i][j] == player && this.board[i+1][j] == player && this.board[i+2][j] == player && this.board[i+3][j] == player){
-//                 return true;
-//             }           
-//         }
-//     }
-//     // ascendingDiagonalCheck 
-//     for (int i=3; i<getWidth(); i++){
-//         for (int j=0; j<getHeight()-3; j++){
-//             if (this.board[i][j] == player && this.board[i-1][j+1] == player && this.board[i-2][j+2] == player && this.board[i-3][j+3] == player)
-//                 return true;
-//         }
-//     }
-//     // descendingDiagonalCheck
-//     for (int i=3; i<getWidth(); i++){
-//         for (int j=3; j<getHeight(); j++){
-//             if (this.board[i][j] == player && this.board[i-1][j-1] == player && this.board[i-2][j-2] == player && this.board[i-3][j-3] == player)
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
 
 // char next_player(board u){
 // //You may put code here

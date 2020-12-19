@@ -10,7 +10,7 @@ int main(){
   // printf("%d\n", (board) my_board->height);
   // printf("%s\n", B.rows[0]);
   // for (int i = 0; i < 10; i++) printf ("%s\n", my_board.rows[i]);
-  infile=fopen("diag_win.txt","r");
+  infile=fopen("decreasing_diag_win.txt","r");
   read_in_file(infile,my_board);
   fclose(infile);
 
@@ -31,3 +31,4 @@ int main(){
   // cleanup_board(my_board);
   return 0;
 }
+ 
