@@ -10,19 +10,20 @@ int main(){
   // printf("%d\n", (board) my_board->height);
   // printf("%s\n", B.rows[0]);
   // for (int i = 0; i < 10; i++) printf ("%s\n", my_board.rows[i]);
-  infile=fopen("decreasing_diag_win.txt","r");
+  infile=fopen("initial_board.txt","r");
   read_in_file(infile,my_board);
   fclose(infile);
 
   write_out_file(stdout,my_board);
-   
-  // while(current_winner(my_board)=='.') {
-  //   struct move next_move = read_in_move(my_board);
+  printf("test1\n");
+  while(current_winner(my_board)=='.') {
+    printf("test\n");
+    struct move next_move = read_in_move(my_board);
   //   if (is_valid_move(next_move,my_board)) {
   //   play_move(next_move,my_board);
   //   write_out_file(stdout,my_board);
   //   }
-  // }
+  }
 
   // outfile=fopen("final_board.txt","w");
   // write_out_file(outfile,my_board);

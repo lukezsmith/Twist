@@ -127,11 +127,11 @@ void write_out_file(FILE *outfile, board u){
   // horizontalCheck 
   // for each symbol
   char symbols[] =  {'x', 'o'};
-  printf("board dims: %dx%d\n", u->width, u->height);
-  printf("board size: %d\n", sizeof(u->rows));
-  for (int i = 0; i < sizeof(u->rows); i++){
-    printf ("%s\n", u->rows[i]);
-  }
+  // printf("board dims: %dx%d\n", u->width, u->height);
+  // printf("board size: %d\n", sizeof(u->rows));
+  // for (int i = 0; i < sizeof(u->rows); i++){
+  //   printf ("%s\n", u->rows[i]);
+  // }
 
 
   for (int k = 0; k < 2; k++){
@@ -211,24 +211,111 @@ void write_out_file(FILE *outfile, board u){
         }
     }
   }
+  // no winners
+  for (int i = 0; i < sizeof(u->rows); i++){
+    fprintf (outfile, "%s\n", u->rows[i]);
+  }
+  return;
 
 }
 
-// char next_player(board u){
-// //You may put code here
-// }
+char next_player(board u){
+  int x_count = 0;
+  int o_count = 0;
 
-// char current_winner(board u){
-// //You may put code here
-// }
+  // count how many tokens each player has and then return the token with the least amount on the board
+  for (int i = 0; i < u->height; i++){
+    for (int j = 0; j < u->width; j++){
+      if (u->rows[i][j] == 'x'){
+        // there is an available slot
+        x_count +=1; 
+      }
+      if (u->rows[i][j] == 'o'){
+        // there is an available slot
+        o_count +=1; 
+      }
+    }
+  }
+  if(x_count < o_count){
+    return 'x';
+  }
+  else{
+    return 'o';
+  }
+}
 
-// struct move read_in_move(board u){
-// //You may put code here
-//   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
-// //You may put code here
-//   printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
-// //You may put code here
-// }
+char current_winner(board u){
+  int emptySpace = 1;
+  char symbols[] =  {'x', 'o'};
+
+  // check board is not full
+  for (int i = 0; i < u->height; i++){
+    for (int j = 0; j < u->width; j++){
+      if (u->rows[i][j] == '.'){
+        // there is an available slot
+        emptySpace = 0;
+        
+      }
+    }
+  }
+  if (emptySpace == 1){
+    return 'd';
+  }
+  
+  // check no winners
+  for (int k = 0; k < 2; k++){
+    for (int j = 0; j<u->width-3 ; j++ ){
+        for (int i = 0; i<u->height; i++){
+            if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
+              return symbols[k];
+            }           
+        }
+    }
+    // verticalCheck
+    for (int i = 0; i<u->height-3; i++ ){
+        for (int j = 0; j<u->width; j++){
+            if (u->rows[i][j] == symbols[k] && u->rows[i+1][j] == symbols[k] && u->rows[i+2][j] == symbols[k] && u->rows[i+3][j] == symbols[k]){
+              return symbols[k];
+            }           
+        }
+    }
+    // ascendingDiagonalCheck 
+    for (int i=3; i<u->height; i++){
+        for (int j=0; j<u->width-3; j++){
+            if (u->rows[i][j] == symbols[k] && u->rows[i-1][j+1] == symbols[k] && u->rows[i-2][j+2] == symbols[k] && u->rows[i-3][j+3] == symbols[k]){
+              return symbols[k];
+            }
+        }
+    }
+        // descendingDiagonalCheck
+    for (int i=3; i<u->height; i++){
+        for (int j=3; j< u->width; j++){
+            if (u->rows[i][j] == symbols[k] && u->rows[i-1][j-1] == symbols[k] && u->rows[i-2][j-2] ==symbols[k] && u->rows[i-3][j-3] == symbols[k]){
+              return symbols[k];
+            }
+        }
+    }
+  }
+
+  return '.';
+}
+
+struct move read_in_move(board u){
+  int col;
+  int row;
+
+  // get user's column
+  printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
+  scanf(" %d", &col);
+
+  // get user's row
+  printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
+  scanf(" %d", &row);
+
+  printf("input column, row: %d, %d\n", col, row);
+  // create move struct and return it
+
+}
 
 // int is_valid_move(struct move m, board u){
 // //You may put code here
