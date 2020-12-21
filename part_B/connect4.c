@@ -1,11 +1,11 @@
 //You can include any of headers defined in the C11 standard here. They are:
 //assert.h, complex.h, ctype.h, errno.h, fenv.h, float.h, inttypes.h, iso646.h, limits.h, locale.h, math.h, setjmp.h, signal.h, stdalign.h, stdarg.h, stdatomic.h, stdbool.h, stddef.h, stdint.h, stdio.h, stdlib.h, stdnoreturn.h, string.h, tgmath.h, threads.h, time.h, uchar.h, wchar.h or wctype.h
 //You may not include any other headers.
-#include"connect4.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include"connect4.h"
 
 struct board_structure {
   // row x column array?
@@ -254,7 +254,6 @@ char current_winner(board u){
       if (u->rows[i][j] == '.'){
         // there is an available slot
         emptySpace = 0;
-        
       }
     }
   }
@@ -287,7 +286,7 @@ char current_winner(board u){
             }
         }
     }
-        // descendingDiagonalCheck
+    // descendingDiagonalCheck
     for (int i=3; i<u->height; i++){
         for (int j=3; j< u->width; j++){
             if (u->rows[i][j] == symbols[k] && u->rows[i-1][j-1] == symbols[k] && u->rows[i-2][j-2] ==symbols[k] && u->rows[i-3][j-3] == symbols[k]){
@@ -317,9 +316,35 @@ struct move read_in_move(board u){
 
 }
 
-// int is_valid_move(struct move m, board u){
-// //You may put code here
-// }
+int is_valid_move(struct move m, board u){
+
+  // int selectedCol; 
+  // // check valid column
+  // if(m.column < )
+  // if(m.row != 0){
+  //   selectedCol = abs(m.column + m.row);
+  // }else{
+  //   selectedCol = abs(m.column);
+  // }
+
+  // check column is valid
+  if(m.column > u->width){
+    printf("Not a valid move, selected column does not exist!\n");
+    return 0;
+  }else{
+    // find next available slot in selected column
+
+    // iterate through rows 
+    for (int i = 0; i < u->height; i++){
+      if (u->rows[i][m.column] == '.'){
+        // there is an available slot
+        return 1;
+      }
+      }
+    // if no space return false
+    return 0;
+  }
+}
 
 // char is_winning_move(struct move m, board u){
 // //You may put code here
