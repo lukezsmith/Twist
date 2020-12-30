@@ -303,16 +303,37 @@ struct move read_in_move(board u){
   int col;
   int row;
 
+  int validCol = 0;
+  int validRow = 0;
+
   // get user's column
   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
-  scanf(" %d", &col);
+  while(scanf("%d", &col) != 1){
+    int chr;
+    printf("Invalid input...\n");
+    printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
+    do {
+        chr = getchar();
+    } while ((chr != EOF) && (chr != '\n'));
+  }
 
   // get user's row
   printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
-  scanf(" %d", &row);
-
+  while(scanf("%d", &row) != 1){
+    int chr;
+    printf("Invalid input...\n");
+    printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
+    do {
+        chr = getchar();
+    } while ((chr != EOF) && (chr != '\n'));
+  }
   printf("input column, row: %d, %d\n", col, row);
   // create move struct and return it
+  struct move my_move;
+  my_move.column = col;
+  my_move.row = row;
+  return my_move;
+
 
 }
 
@@ -328,19 +349,26 @@ int is_valid_move(struct move m, board u){
   // }
 
   // check column is valid
-  if(m.column > u->width){
-    printf("Not a valid move, selected column does not exist!\n");
+  if(m.column > u->width || m.column < 0 || m.row > u->height || m.row < -1 || m.row > 1 ){
+    // printf("Not a valid move, selected column does not exist!\n");
+    printf("Not a valid move\n");
     return 0;
   }else{
+    printf("is_valid else\n");
     // find next available slot in selected column
 
     // iterate through rows 
     for (int i = 0; i < u->height; i++){
+      printf("for loop: %d\n", i);
+      // printf("board val: %c\n", u->rows[1][1]);
+      printf("board val: %s\n", u->rows[i]);
       if (u->rows[i][m.column] == '.'){
+        printf("is_valid returning 1\n");
         // there is an available slot
         return 1;
       }
-      }
+    }
+    printf("is_valid returning 0\n");
     // if no space return false
     return 0;
   }
@@ -350,8 +378,18 @@ int is_valid_move(struct move m, board u){
 // //You may put code here
 // }
 
-// void play_move(struct move m, board u){
-// //You may put code here
-// }
+void play_move(struct move m, board u){
+  // place token in col
+    // iterate through rows (bottom up)
+    for (int i = u->height; i > 0; i--){
+      if (u->rows[i][m.column] == '.'){
+        // there is an available slot
+        u->rows[i][m.column] = next_player(u);
+        break;
+      }
+    }  
+  // rotate row
+
+}
 
 //You may put additional functions here if you wish.
