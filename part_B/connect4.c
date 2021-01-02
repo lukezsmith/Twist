@@ -213,7 +213,7 @@ void write_out_file(FILE *outfile, board u){
   }
   // no winners
   for (int i = 0; i < sizeof(u->rows); i++){
-    fprintf (outfile, "%s\n", u->rows[i]);
+    fprintf (outfile, "LINE: %s\n", u->rows[i]);
   }
   return;
 
@@ -327,7 +327,7 @@ struct move read_in_move(board u){
         chr = getchar();
     } while ((chr != EOF) && (chr != '\n'));
   }
-  printf("input column, row: %d, %d\n", col, row);
+  // printf("input column, row: %d, %d\n", col, row);
   // create move struct and return it
   struct move my_move;
   my_move.column = col;
@@ -349,26 +349,26 @@ int is_valid_move(struct move m, board u){
   // }
 
   // check column is valid
-  if(m.column > u->width || m.column < 0 || m.row > u->height || m.row < -1 || m.row > 1 ){
+  if(m.column > u->width+1 || m.column < 1 || abs(m.row) > u->height){
     // printf("Not a valid move, selected column does not exist!\n");
     printf("Not a valid move\n");
     return 0;
   }else{
-    printf("is_valid else\n");
+    // printf("is_valid else\n");
     // find next available slot in selected column
 
     // iterate through rows 
     for (int i = 0; i < u->height; i++){
-      printf("for loop: %d\n", i);
+      // printf("for loop: %d\n", i);
       // printf("board val: %c\n", u->rows[1][1]);
-      printf("board val: %s\n", u->rows[i]);
-      if (u->rows[i][m.column] == '.'){
-        printf("is_valid returning 1\n");
+      // printf("board val: %s\n", u->rows[i]);
+      if (u->rows[i][m.column-1] == '.'){
+        // printf("is_valid returning 1\n");
         // there is an available slot
         return 1;
       }
     }
-    printf("is_valid returning 0\n");
+    // printf("is_valid returning 0\n");
     // if no space return false
     return 0;
   }
@@ -380,16 +380,41 @@ int is_valid_move(struct move m, board u){
 
 void play_move(struct move m, board u){
   // place token in col
-    // iterate through rows (bottom up)
-    for (int i = u->height; i > 0; i--){
-      if (u->rows[i][m.column] == '.'){
-        // there is an available slot
-        u->rows[i][m.column] = next_player(u);
-        break;
+  // iterate through rows (bottom up)
+  for (int i = u->height; i > 0; i--){
+    if (u->rows[i][m.column-1] == '.'){
+      // there is an available slot
+      u->rows[i][m.column-1] = next_player(u);
+      break;
+    }
+  }  
+  if (m.row != 0){
+    printf("Row %d: %s\n", abs(m.row), u->rows[u->height-m.row]);
+    // twist row
+    // rightward
+    if (m.row > 0){
+      char tempData  = u->rows[u->height-abs(m.row)][u->width-1];
+      for (int i= u->width-1; i >0; i--){
+        // char c = u->rows[u->height-abs(m.row)][i];
+        // char d = u->rows[u->height-abs(m.row)][(i+1)%u->width];
+        // u->rows[u->height-abs(m.row)][i] = d; 
+        // u->rows[u->height-abs(m.row)][(i+1)%u->width] = c;
+        u->rows[u->height-abs(m.row)][i] = u->rows[u->height-abs(m.row)][i-1]; 
       }
-    }  
-  // rotate row
-
+      u->rows[u->height-abs(m.row)][0] = tempData;
+    }else{
+    // leftward
+      char tempData  = u->rows[u->height-abs(m.row)][0];
+      for (int i= 0; i < u->width-1; i++){
+        // char c = u->rows[u->height-m.row][i];
+        // char d = u->rows[u->height-m.row][(i-1)%u->width];
+        // u->rows[u->height-m.row][i] = d; 
+        // u->rows[u->height-m.row][(i-1)%u->width] = c;
+        u->rows[u->height-abs(m.row)][i] = u->rows[u->height-abs(m.row)][i+1]; 
+      }
+      u->rows[u->height-abs(m.row)][u->width-1] = tempData;
+    }
+  }
 }
 
 //You may put additional functions here if you wish.
