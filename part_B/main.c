@@ -13,13 +13,21 @@ int main(){
   infile=fopen("initial_board.txt","r");
   read_in_file(infile,my_board);
   fclose(infile);
-
   write_out_file(stdout,my_board);
+
   while(current_winner(my_board)=='.') {
     struct move next_move = read_in_move(my_board);
+    // write_out_file(stdout,my_board); 
+    // int col = 1;
+    // int row = 1;
+    // struct move next_move;
+    // next_move.column = col;
+    // next_move.row= row;
     if (is_valid_move(next_move,my_board)) {
+      // write_out_file(stdout,my_board);
+      // printf("%s\n", my_board->rows[0]);
       play_move(next_move,my_board);
-      write_out_file(stdout,my_board);
+      write_out_file(stdout,my_board); 
     }
   }
 

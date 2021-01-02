@@ -66,7 +66,7 @@ void read_in_file(FILE *infile, board u){
       // get and check line length
       if (n == 0){
         lineLength = strlen(lines[n]) -1 ;
-        printf("line length: %d\n", lineLength);
+        // printf("line length: %d\n", lineLength);
         u->width = lineLength;
 
         if (lineLength <4 || lineLength > 512){
@@ -106,7 +106,12 @@ void read_in_file(FILE *infile, board u){
   u->height = n;
 
   // set board rows
-  u->rows = lines;
+  // u->rows = lines;
+  memcpy(u->rows, lines, maxl * sizeof *lines);
+  // printf("Read in print: \n");
+  // for (int i = 0; i < u->height; i++){
+  //   fprintf (stdout, "%d %s\n", u->height-i,  u->rows[i]);
+  // }
 
   // board check
   // printf("board dim: %dx%d\n", u->width, u->height);
@@ -117,6 +122,9 @@ void read_in_file(FILE *infile, board u){
 }
 
 void write_out_file(FILE *outfile, board u){
+  // printf("First row (write_out_file): %s\n", u->rows[0]);
+  // fflush(stdin); 
+  // fflush(stdout); 
   // write board rows to the outfile
   // for (int i = 0; i < sizeof(u->rows); i++){
     // check string for four consecutive tokens
@@ -212,8 +220,11 @@ void write_out_file(FILE *outfile, board u){
     }
   }
   // no winners
-  for (int i = 0; i < sizeof(u->rows); i++){
-    fprintf (outfile, "LINE: %s\n", u->rows[i]);
+  // printf("\n");
+  // printf("First line: %s\n", u->rows[0]);
+  fflush(stdout);
+  for (int i = 0; i < u->height; i++){
+    fprintf (outfile, "%d %s\n", u->height - i, u->rows[i]);
   }
   return;
 
@@ -245,6 +256,7 @@ char next_player(board u){
 }
 
 char current_winner(board u){
+  // printf("First row (current_winnerrst): %s\n", u->rows[0]);
   int emptySpace = 1;
   char symbols[] =  {'x', 'o'};
 
@@ -299,12 +311,19 @@ char current_winner(board u){
   return '.';
 }
 
+
+int read_int(void) {
+    int f;
+    if (scanf("%d", &f) != 1) {
+        printf("Sorry that input is invalid.\n");
+        exit(1);
+    }
+    return f;
+}
+
 struct move read_in_move(board u){
   int col;
   int row;
-
-  int validCol = 0;
-  int validRow = 0;
 
   // get user's column
   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
@@ -315,6 +334,7 @@ struct move read_in_move(board u){
     do {
         chr = getchar();
     } while ((chr != EOF) && (chr != '\n'));
+    fflush(stdout); 
   }
 
   // get user's row
@@ -327,8 +347,7 @@ struct move read_in_move(board u){
         chr = getchar();
     } while ((chr != EOF) && (chr != '\n'));
   }
-  // printf("input column, row: %d, %d\n", col, row);
-  // create move struct and return it
+  // printf("move: col %c, row %c\n", , row);
   struct move my_move;
   my_move.column = col;
   my_move.row = row;
@@ -379,6 +398,7 @@ int is_valid_move(struct move m, board u){
 // }
 
 void play_move(struct move m, board u){
+  // printf("First row (play_move): %s\n", u->rows[0]);
   // place token in col
   // iterate through rows (bottom up)
   for (int i = u->height; i > 0; i--){
@@ -389,11 +409,12 @@ void play_move(struct move m, board u){
     }
   }  
   if (m.row != 0){
-    printf("Row %d: %s\n", abs(m.row), u->rows[u->height-m.row]);
+    // printf("Row %d: %s\n", abs(m.row), u->rows[u->height-m.row]);
     // twist row
     // rightward
     if (m.row > 0){
       char tempData  = u->rows[u->height-abs(m.row)][u->width-1];
+      // printf("tempdata: %c\n", tempData);
       for (int i= u->width-1; i >0; i--){
         // char c = u->rows[u->height-abs(m.row)][i];
         // char d = u->rows[u->height-abs(m.row)][(i+1)%u->width];
