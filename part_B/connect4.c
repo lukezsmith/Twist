@@ -169,11 +169,6 @@ void write_out_file(FILE *outfile, board u){
     for (int i = 0; i<u->height-3; i++ ){
         for (int j = 0; j<u->width; j++){
             if (u->rows[i][j] == symbols[k] && u->rows[i+1][j] == symbols[k] && u->rows[i+2][j] == symbols[k] && u->rows[i+3][j] == symbols[k]){
-                printf("VERTICAL WIN!!\n");
-                printf("i: %d, j: %d\n", i, j);
-                printf("i: %d, j: %d\n", i+1, j);
-                printf("i: %d, j: %d\n", i+2, j);
-                printf("i: %d, j: %d\n", i+3, j);
                 // capitalise o's
                 u->rows[i][j] = toupper(symbols[k]);
                 u->rows[i+1][j] = toupper(symbols[k]);
@@ -191,7 +186,6 @@ void write_out_file(FILE *outfile, board u){
     for (int i=3; i<u->height; i++){
         for (int j=0; j<u->width-3; j++){
             if (u->rows[i][j] == symbols[k] && u->rows[i-1][j+1] == symbols[k] && u->rows[i-2][j+2] == symbols[k] && u->rows[i-3][j+3] == symbols[k]){
-                printf("DIAGONAL (asc) WIN!!\n");
                 // capitalise o's
                 u->rows[i][j] = toupper(symbols[k]);
                 u->rows[i-1][j+1] = toupper(symbols[k]);
@@ -209,7 +203,6 @@ void write_out_file(FILE *outfile, board u){
     for (int i=3; i<u->height; i++){
         for (int j=3; j< u->width; j++){
             if (u->rows[i][j] == symbols[k] && u->rows[i-1][j-1] == symbols[k] && u->rows[i-2][j-2] ==symbols[k] && u->rows[i-3][j-3] == symbols[k]){
-                printf("DIAGONAL (desc) WIN!!\n");
                 // capitalise o's
                 u->rows[i][j] = toupper(symbols[k]);
                 u->rows[i-1][j-1] = toupper(symbols[k]);
@@ -229,35 +222,58 @@ void write_out_file(FILE *outfile, board u){
   // printf("First line: %s\n", u->rows[0]);
   fflush(stdout);
   for (int i = 0; i < u->height; i++){
-    fprintf (outfile, "%d %s\n", u->height - i, u->rows[i]);
+    fprintf (outfile, "%s\n", u->rows[i]);
   }
   return;
 
 }
 
 char next_player(board u){
-  int x_count = 0;
-  int o_count = 0;
+  // int x_count = 0;
+  // int o_count = 0;
 
-  // count how many tokens each player has and then return the token with the least amount on the board
+  // // count how many tokens each player has and then return the token with the least amount on the board
+  // for (int i = 0; i < u->height; i++){
+  //   for (int j = 0; j < u->width; j++){
+  //     if (u->rows[i][j] == 'x'){
+  //       // there is an available slot
+  //       x_count +=1; 
+  //     }
+  //     if (u->rows[i][j] == 'o'){
+  //       // there is an available slot
+  //       o_count +=1; 
+  //     }
+  //   }
+  // }
+  // printf("x_count: %d\n", x_count);
+  // printf("o_count: %d\n", o_count);
+  // if(x_count < o_count){
+  //   printf("x's turn to play!\n");
+  //   return 'x';
+  // }
+  // else{
+  //   printf("o's turn to play!\n");
+  //   return 'o';
+  // }
+  int token_count = 0;
+
+  // count tokens on board
   for (int i = 0; i < u->height; i++){
     for (int j = 0; j < u->width; j++){
-      if (u->rows[i][j] == 'x'){
         // there is an available slot
-        x_count +=1; 
-      }
-      if (u->rows[i][j] == 'o'){
-        // there is an available slot
-        o_count +=1; 
-      }
+        if(u->rows[i][j] != '.'){
+          token_count +=1; 
+        }
     }
   }
-  if(x_count < o_count){
+  // if odd turn it is x's turn
+  if(token_count == 0 || token_count % 2 == 0){
     return 'x';
-  }
-  else{
+  }else{
+    // else it is o's turn 
     return 'o';
   }
+
 }
 
 char current_winner(board u){
