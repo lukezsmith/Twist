@@ -47,9 +47,10 @@ board setup_board(){
 
 }
 
-// void cleanup_board(board u){
-// //You may put code here
-// }
+void cleanup_board(board u){
+  free(u->rows);
+  free(u);
+}
 
 void read_in_file(FILE *infile, board u){
   int n = 0;
@@ -259,19 +260,6 @@ char current_winner(board u){
   // printf("First row (current_winnerrst): %s\n", u->rows[0]);
   int emptySpace = 1;
   char symbols[] =  {'x', 'o'};
-
-  // check board is not full
-  for (int i = 0; i < u->height; i++){
-    for (int j = 0; j < u->width; j++){
-      if (u->rows[i][j] == '.'){
-        // there is an available slot
-        emptySpace = 0;
-      }
-    }
-  }
-  if (emptySpace == 1){
-    return 'd';
-  }
   
   // check no winners
   for (int k = 0; k < 2; k++){
@@ -308,17 +296,20 @@ char current_winner(board u){
     }
   }
 
-  return '.';
-}
-
-
-int read_int(void) {
-    int f;
-    if (scanf("%d", &f) != 1) {
-        printf("Sorry that input is invalid.\n");
-        exit(1);
+    // check board is not full
+  for (int i = 0; i < u->height; i++){
+    for (int j = 0; j < u->width; j++){
+      if (u->rows[i][j] == '.'){
+        // there is an available slot
+        emptySpace = 0;
+      }
     }
-    return f;
+  }
+  if (emptySpace == 1){
+    return 'd';
+  }
+
+  return '.';
 }
 
 struct move read_in_move(board u){
@@ -334,7 +325,7 @@ struct move read_in_move(board u){
     do {
         chr = getchar();
     } while ((chr != EOF) && (chr != '\n'));
-    fflush(stdout); 
+    // fflush(stdout); 
   }
 
   // get user's row
@@ -393,15 +384,75 @@ int is_valid_move(struct move m, board u){
   }
 }
 
-// char is_winning_move(struct move m, board u){
-// //You may put code here
-// }
+char is_winning_move(struct move m, board u){
+  // copy board
+  // board tempBoard;
+  struct board_structure *tempBoard;
+  tempBoard = (struct board_structure *) malloc(sizeof(struct board_structure));
+  tempBoard->height = u->height;
+  tempBoard->width= u->width;
+  tempBoard->rows = malloc(u->height * sizeof(char *));
+  tempBoard->rows = u->rows;
+
+  // sanity check print
+  // printf("tempBoard sanity check: \n");
+  // for (int i = 0; i < tempBoard->height; i++){
+  //   fprintf (stdout, "%d %s\n", tempBoard->height-i,  tempBoard->rows[i]);
+  // }
+  // printf("copied safely\n");
+  // memcpy(tempBoard->rows, u->rows, sizeof *u->rows); 
+  // memcpy(tempBoard, u, sizeof *u); 
+
+  // check move is valid
+  if(is_valid_move(m, tempBoard)){
+    // printf("valid move\n");
+    // play move
+    play_move(m,tempBoard);
+
+
+      // sanity check print
+    // printf("tempBoard post-move sanity check: \n");
+    // for (int i = 0; i < tempBoard->height; i++){
+    //   fprintf (stdout, "%d %s\n", tempBoard->height-i,  tempBoard->rows[i]);
+    // }
+
+    // check if move yields a winner
+    char winner = current_winner(tempBoard);
+    printf("winner: %c\n", winner);
+
+    // if winner is . it could currently be a draw OR there is no winner yet
+    if (winner == '.'){
+      // if no available spaces in the board
+      // find next available slot in selected column
+
+      // iterate through rows 
+      for (int i = 0; i < tempBoard->height; i++){
+        for (int j = 0; j < tempBoard->width; j++){ 
+          if (tempBoard->rows[i][j] == '.'){
+            // there is an available slot
+            return '.';
+          }
+        }
+      }
+      // if no space found we return that the move results in a draw
+      return 'd';
+    }else{
+      // else there is a winner and we return the winner's token
+      return winner;
+    }
+
+  }else{
+    printf("invalid move\n");
+    // invalid move so no one wins/draws
+    return '.';
+  }
+}
 
 void play_move(struct move m, board u){
   // printf("First row (play_move): %s\n", u->rows[0]);
   // place token in col
   // iterate through rows (bottom up)
-  for (int i = u->height; i > 0; i--){
+  for (int i = u->height; i >= 0; i--){
     if (u->rows[i][m.column-1] == '.'){
       // there is an available slot
       u->rows[i][m.column-1] = next_player(u);
@@ -409,17 +460,11 @@ void play_move(struct move m, board u){
     }
   }  
   if (m.row != 0){
-    // printf("Row %d: %s\n", abs(m.row), u->rows[u->height-m.row]);
     // twist row
     // rightward
     if (m.row > 0){
       char tempData  = u->rows[u->height-abs(m.row)][u->width-1];
-      // printf("tempdata: %c\n", tempData);
       for (int i= u->width-1; i >0; i--){
-        // char c = u->rows[u->height-abs(m.row)][i];
-        // char d = u->rows[u->height-abs(m.row)][(i+1)%u->width];
-        // u->rows[u->height-abs(m.row)][i] = d; 
-        // u->rows[u->height-abs(m.row)][(i+1)%u->width] = c;
         u->rows[u->height-abs(m.row)][i] = u->rows[u->height-abs(m.row)][i-1]; 
       }
       u->rows[u->height-abs(m.row)][0] = tempData;
@@ -427,13 +472,36 @@ void play_move(struct move m, board u){
     // leftward
       char tempData  = u->rows[u->height-abs(m.row)][0];
       for (int i= 0; i < u->width-1; i++){
-        // char c = u->rows[u->height-m.row][i];
-        // char d = u->rows[u->height-m.row][(i-1)%u->width];
-        // u->rows[u->height-m.row][i] = d; 
-        // u->rows[u->height-m.row][(i-1)%u->width] = c;
         u->rows[u->height-abs(m.row)][i] = u->rows[u->height-abs(m.row)][i+1]; 
       }
       u->rows[u->height-abs(m.row)][u->width-1] = tempData;
+    }
+
+    // handle gravity
+    // iterate from bottom to top
+    // if 
+    for(int i = 0; i < u->height; i++){
+      for (int j = 0; j <u->width; j++){
+        if (u->rows[i][j]!= '.'){
+          printf("non-dot token found!\n");
+          // check all tokens below are also not .
+          for (int k = i; k< u->height; k++){
+            if(u->rows[k][j] == '.'){
+              printf("hanging dot found!\n");
+              // BUBBLE NOT WORKING NEED TO DEBUG IT!!!!!
+              // bubble . upwards k places
+              for(int l = 0; l < k; l++){
+                printf("bubbling up %d times!\n", l);
+                char tempA = u->rows[k-l][j];
+                char tempB = u->rows[(k-l)-1][j];
+                 u->rows[k-l][j] = tempB; 
+                 u->rows[(k-l)-1][j] = tempA; 
+              }
+            }
+          }
+
+        }
+      }
     }
   }
 }

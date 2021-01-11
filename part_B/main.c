@@ -6,26 +6,19 @@ int main(){
 
   board my_board=setup_board();
 
-  // printf("Board structure: \n");
-  // printf("%d\n", (board) my_board->height);
-  // printf("%s\n", B.rows[0]);
-  // for (int i = 0; i < 10; i++) printf ("%s\n", my_board.rows[i]);
   infile=fopen("initial_board.txt","r");
+  // infile=fopen("draw_board.txt","r");
   read_in_file(infile,my_board);
   fclose(infile);
   write_out_file(stdout,my_board);
 
+  // struct move next_move = read_in_move(my_board);
+  // char isWin = is_winning_move(next_move, my_board);
+  // printf("winning move: %c\n", isWin);
+
   while(current_winner(my_board)=='.') {
     struct move next_move = read_in_move(my_board);
-    // write_out_file(stdout,my_board); 
-    // int col = 1;
-    // int row = 1;
-    // struct move next_move;
-    // next_move.column = col;
-    // next_move.row= row;
     if (is_valid_move(next_move,my_board)) {
-      // write_out_file(stdout,my_board);
-      // printf("%s\n", my_board->rows[0]);
       play_move(next_move,my_board);
       write_out_file(stdout,my_board); 
     }
