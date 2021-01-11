@@ -31,4 +31,3 @@ int main(){
   // cleanup_board(my_board);
   return 0;
 }
- 

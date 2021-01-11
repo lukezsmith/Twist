@@ -78,8 +78,8 @@ void read_in_file(FILE *infile, board u){
       }
 
       // check all lines are same length
-      if (strlen(lines[n])-1 != lineLength){
-          printf("Curr line length: %d\n", strlen(lines[n]-1));
+      if ((int) strlen(lines[n])-1 != lineLength){
+          printf("Curr line length: %d\n", (int) strlen(lines[n]-1));
           printf("Invalid board size\n");
           return;
       }
@@ -101,13 +101,15 @@ void read_in_file(FILE *infile, board u){
           maxl *= 2;      /* update maxl to reflect new size */
       }                         /* nul-termiante  */
   }
-  if (infile != stdin) fclose (infile);   /* close file if not stdin */
+  // if (infile != stdin) fclose (infile);   /* close file if not stdin */
 
   // set board height
   u->height = n;
 
   // set board rows
   // u->rows = lines;
+  
+  u->rows = malloc(maxl * sizeof *lines);
   memcpy(u->rows, lines, maxl * sizeof *lines);
   // printf("Read in print: \n");
   // for (int i = 0; i < u->height; i++){
@@ -120,6 +122,8 @@ void read_in_file(FILE *infile, board u){
   // for (int i = 0; i < n; i++) printf ("%c\n", u->rows[i][7]);
   
   free (lines);   /* free allocated memory */
+  // printf("u-> height = %d\n", u->height);
+  // printf("sizeof u->rows = %d\n", sizeof(u->rows));
 }
 
 void write_out_file(FILE *outfile, board u){
@@ -153,7 +157,7 @@ void write_out_file(FILE *outfile, board u){
                 u->rows[i][j+1] = toupper(symbols[k]);
                 u->rows[i][j+2] = toupper(symbols[k]);
                 u->rows[i][j+3] = toupper(symbols[k]);
-                for (int i = 0; i < sizeof(u->rows); i++){
+                  for (int i = 0; i < u->height; i++){
                     fprintf (outfile, "%s\n", u->rows[i]);
                 }
                 fclose(outfile);
@@ -175,7 +179,7 @@ void write_out_file(FILE *outfile, board u){
                 u->rows[i+1][j] = toupper(symbols[k]);
                 u->rows[i+2][j] = toupper(symbols[k]);
                 u->rows[i+3][j] = toupper(symbols[k]);
-                for (int i = 0; i < sizeof(u->rows); i++){
+                for (int i = 0; i < u->height; i++){
                     fprintf (outfile, "%s\n", u->rows[i]);
                 }
                 fclose(outfile);
@@ -193,7 +197,7 @@ void write_out_file(FILE *outfile, board u){
                 u->rows[i-1][j+1] = toupper(symbols[k]);
                 u->rows[i-2][j+2] = toupper(symbols[k]);
                 u->rows[i-3][j+3] = toupper(symbols[k]);
-                for (int i = 0; i < sizeof(u->rows); i++){
+                for (int i = 0; i < u->height; i++){
                     fprintf (outfile, "%s\n", u->rows[i]);
                 }
                 fclose(outfile);
@@ -211,7 +215,7 @@ void write_out_file(FILE *outfile, board u){
                 u->rows[i-1][j-1] = toupper(symbols[k]);
                 u->rows[i-2][j-2] = toupper(symbols[k]);
                 u->rows[i-3][j-3] = toupper(symbols[k]);
-                for (int i = 0; i < sizeof(u->rows); i++){
+                for (int i = 0; i < u->height; i++){
                     fprintf (outfile, "%s\n", u->rows[i]);
                 }
                 fclose(outfile);
@@ -483,15 +487,15 @@ void play_move(struct move m, board u){
     for(int i = 0; i < u->height; i++){
       for (int j = 0; j <u->width; j++){
         if (u->rows[i][j]!= '.'){
-          printf("non-dot token found!\n");
+          // printf("non-dot token found!\n");
           // check all tokens below are also not .
           for (int k = i; k< u->height; k++){
             if(u->rows[k][j] == '.'){
-              printf("hanging dot found!\n");
+              // printf("hanging dot found!\n");
               // BUBBLE NOT WORKING NEED TO DEBUG IT!!!!!
               // bubble . upwards k places
               for(int l = 0; l < k; l++){
-                printf("bubbling up %d times!\n", l);
+                // printf("bubbling up %d times!\n", l);
                 char tempA = u->rows[k-l][j];
                 char tempB = u->rows[(k-l)-1][j];
                  u->rows[k-l][j] = tempB; 

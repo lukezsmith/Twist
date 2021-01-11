@@ -6,7 +6,7 @@ int row;
 };
 
 board setup_board();
-// void cleanup_board(board u);
+void cleanup_board(board u);
 
 void read_in_file(FILE *infile, board u);
 void write_out_file(FILE *outfile, board u);
