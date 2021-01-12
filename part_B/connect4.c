@@ -151,7 +151,6 @@ void write_out_file(FILE *outfile, board u){
     for (int j = 0; j<u->width-3 ; j++ ){
         for (int i = 0; i<u->height; i++){
             if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
-                printf("HORIZONTAL WIN!!\n");
                 // capitalise o's
                 u->rows[i][j] = toupper(symbols[k]);
                 u->rows[i][j+1] = toupper(symbols[k]);
@@ -160,7 +159,7 @@ void write_out_file(FILE *outfile, board u){
                   for (int i = 0; i < u->height; i++){
                     fprintf (outfile, "%s\n", u->rows[i]);
                 }
-                fclose(outfile);
+                // fclose(outfile);
                 return;
             }           
         }
@@ -177,7 +176,7 @@ void write_out_file(FILE *outfile, board u){
                 for (int i = 0; i < u->height; i++){
                     fprintf (outfile, "%s\n", u->rows[i]);
                 }
-                fclose(outfile);
+                // fclose(outfile);
                 return;
             }           
         }
@@ -194,7 +193,7 @@ void write_out_file(FILE *outfile, board u){
                 for (int i = 0; i < u->height; i++){
                     fprintf (outfile, "%s\n", u->rows[i]);
                 }
-                fclose(outfile);
+                // fclose(outfile);
                 return;
             }
         }
@@ -211,7 +210,7 @@ void write_out_file(FILE *outfile, board u){
                 for (int i = 0; i < u->height; i++){
                     fprintf (outfile, "%s\n", u->rows[i]);
                 }
-                fclose(outfile);
+                // fclose(outfile);
                 return;              
             }
         }
@@ -220,7 +219,7 @@ void write_out_file(FILE *outfile, board u){
   // no winners
   // printf("\n");
   // printf("First line: %s\n", u->rows[0]);
-  fflush(stdout);
+  // fflush(stdout);
   for (int i = 0; i < u->height; i++){
     fprintf (outfile, "%s\n", u->rows[i]);
   }
@@ -277,16 +276,17 @@ char next_player(board u){
 }
 
 char current_winner(board u){
-  // printf("First row (current_winnerrst): %s\n", u->rows[0]);
   int emptySpace = 1;
-  char symbols[] =  {'x', 'o'};
+  char symbols[] =  {'X', 'O'};
   
   // check no winners
   for (int k = 0; k < 2; k++){
+    // horizontal Check
     for (int j = 0; j<u->width-3 ; j++ ){
         for (int i = 0; i<u->height; i++){
             if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
-              return symbols[k];
+                // fclose(outfile);
+                return symbols[k];
             }           
         }
     }

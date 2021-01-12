@@ -2,7 +2,7 @@
 #include"connect4.h"
 int main(){
   FILE *infile;
-  // FILE *outfile;
+  FILE *outfile;
 
   board my_board=setup_board();
 
@@ -25,10 +25,10 @@ int main(){
     }
   }
 
-  // outfile=fopen("final_board.txt","w");
-  // write_out_file(outfile,my_board);
-  // fclose(outfile);
+  outfile=fopen("final_board.txt","w");
+  write_out_file(outfile,my_board);
+  fclose(outfile);
 
-  // cleanup_board(my_board);
+  cleanup_board(my_board);
   return 0;
 }
