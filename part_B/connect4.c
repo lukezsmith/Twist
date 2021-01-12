@@ -15,15 +15,19 @@ struct board_structure {
 
 board setup_board(){
   // initial row and column size in order to play connect4
-  int initialSize = 4;
+  int maxSize = 512;
 
   // allocate memory for board struct
   struct board_structure *B;
   B = (struct board_structure *) malloc(sizeof(struct board_structure));
 
   // dynamically allocate memory for dynamic amount of rows
-  B->rows = malloc(initialSize * sizeof(char *));
-  // DOES THIS NOT NEED TO BE MALLOCED?
+  if (!(B->rows = malloc (maxSize * sizeof (char *)))) {
+    // not enough memory to assign
+    fprintf (stderr, "Error: Insufficient memory to store board.\n");
+    exit(1);
+  }
+
   B->height = 4;
   B->width = 4;
 
@@ -48,12 +52,7 @@ void read_in_file(FILE *infile, board u){
   // create pointer to char array of size 512
   char (*rows)[maxWidth] = NULL;
 
-  // allocate 4 initial char arrays 
-  if (!(u->rows = malloc (maxHeight * sizeof *rows))) {
-    // not enough memory to assign
-    fprintf (stderr, "Error: Insufficient memory to store board.\n");
-    exit(1);
-  }
+ 
   // iterate through each line in infile
   while (n< maxHeight && fgets (u->rows[n], maxWidth, infile)) {
       // if first line
