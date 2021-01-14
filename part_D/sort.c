@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <locale.h>
 
 #include "sort.h"
-
-enum { MAXL = 40, MAXC = 50 };
 
 // rules
 
@@ -25,47 +24,44 @@ enum { MAXL = 40, MAXC = 50 };
 void displayUsageInfo(){
   printf("This is the usage for sort \n"
        "Valid options are:\n"
-       "    --r: reverse the sorting order\n"
-       "    --o: specify output file for the sorted file to be saved to\n"
-       "    --n: use numerical value to sort on\n"
-       "    --h: display usage information the program\n");
+       "    -r: reverse the sorting order\n"
+       "    -o: specify output file for the sorted file to be saved to\n"
+       "    -n: use numerical value to sort on\n"
+       "    -h: display usage information the program\n");
 }
 
-int cmpfunc (const void * a, const void * b) {
-  const char* aa = (const char*)a;
-  const char* bb = (const char*)b;
-
-    int ca, cb;
-  do {
-     ca = (unsigned char) *aa++;
-     cb = (unsigned char) *bb++;
-     ca = tolower(toupper(ca));
-     cb = tolower(toupper(cb));
-   } while (ca == cb && ca != '\0');
-   return ca - cb;
-  // return strcasecmp(aa, bb);
-  
-
-}
-
-int reversecmpfunc (const void * a, const void * b) {
+int compareFunction (const void * a, const void * b) {
   // const char* aa = (const char*)a;
   // const char* bb = (const char*)b;
-  // return strcasecmp(bb, aa);
-  const char* aa = (const char*)a;
-  const char* bb = (const char*)b;
 
-    int ca, cb;
-  do {
-     ca = (unsigned char) *aa++;
-     cb = (unsigned char) *bb++;
-     ca = tolower(toupper(ca));
-     cb = tolower(toupper(cb));
-   } while (ca == cb && ca != '\0');
-   return cb - ca;
+  //   int ca, cb;
+  // do {
+  //    ca = (unsigned char) *aa++;
+  //    cb = (unsigned char) *bb++;
+  //    ca = tolower(toupper(ca));
+  //    cb = tolower(toupper(cb));
+  //  } while (ca == cb && ca != '\0');
+  //  return ca - cb;
+
+  return strcoll(a, b);
 }
 
-int numbercmpfunc(const void * a, const void * b) {
+int reverseCompareFunction (const void * a, const void * b) {
+  // const char* aa = (const char*)a;
+  // const char* bb = (const char*)b;
+
+  //   int ca, cb;
+  // do {
+  //    ca = (unsigned char) *aa++;
+  //    cb = (unsigned char) *bb++;
+  //    ca = tolower(toupper(ca));
+  //    cb = tolower(toupper(cb));
+  //  } while (ca == cb && ca != '\0');
+  //  return cb - ca;
+  return strcoll(b, a);
+}
+
+int numericCompareFunction(const void * a, const void * b) {
   char* ptra;
   char* ptrb;
   const char* aa = (const char*)a;
@@ -78,7 +74,7 @@ int numbercmpfunc(const void * a, const void * b) {
   return ( (int)reta - (int)retb );
 }
 
-int reversenumbercmpfunc(const void * a, const void * b) {
+int reverseNumericCompareFunction(const void * a, const void * b) {
   char* ptra;
   char* ptrb;
   const char* aa = (const char*)a;
@@ -91,25 +87,18 @@ int reversenumbercmpfunc(const void * a, const void * b) {
   return ( (int)retb - (int)reta );
 } 
 
-
-void writeToFile(char *filename, char *lines, int n){
-  printf("writing......!");
-  int i = 0;
-  FILE *f;
-  // check file 
-  if ((f = fopen(filename, "wb")) == NULL) {
-    printf("Can't open file %s\n", filename);
-  }
-  for (i = 0; i < n; i++) fprintf (f, "%c\n", lines[i]);
-  fclose(f);
-}
 int main(int argc, char *argv[]){
-  char (*lines)[MAXC] = NULL; 
+  // bypass compilation warning
+  (void) argc;
   char (*outputFilename) = "";
   char sortType = 'd';
   char outputType = 'c';
   int reverse = 0;
   FILE *fp;
+
+  // set system locale
+  setlocale(LC_ALL, "");
+
 
   // iterate through arguments
 
@@ -149,7 +138,14 @@ int main(int argc, char *argv[]){
           // process & sort using reversed compare function
           break;
       }
+    }else{
+      printf("argc: %d\n", argc);
     }
+  }
+  // if no arguments passed print usage????
+  if(argc == 1){
+    displayUsageInfo();
+    return 1;
   }
   // printf("n.o arguments: %d", argc);
   // if(argc < 2)
@@ -164,48 +160,63 @@ int main(int argc, char *argv[]){
     return 1;
   }else{
     // process file
-    ProcessFileAlt(fp, argv[-1], sortType, outputType, reverse, outputFilename);
+    process_file(fp, sortType, outputType, reverse, outputFilename);
     return 0;
     }
 }
 
-void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType, int reverse, char* outputFilename){
-  char (*lines)[MAXC] = NULL; /* pointer to array of type char [MAXC] */
-  
-  int i, n = 0, maxl = MAXL;
+void process_file(FILE* fp, char sortType, char outputType, int reverse, char* outputFilename){
+  int n = 0;
+  // int maxLines = 40;
+  int maxLines = 10;
+  int maxChars = 512;
 
+  // create pointer to char array of size 512
+  char (*input)[maxChars] = NULL;
 
-  if (!(lines = malloc (MAXL * sizeof *lines))) { /* allocate MAXL arrays */
-      fprintf (stderr, "error: virtual memory exhausted 'lines'.\n");
+  // check that the allocation was possible
+  if (!(input = malloc (maxLines * sizeof *input))) { 
+    fprintf (stderr, "Error: Insufficient memory to store board.\n");
+    exit(1);
   }
 
-  while (n < MAXL && fgets (lines[n], MAXC, fp)) { /* read each line */
-      char *p = lines[n];                  /* assign pointer */
-      for (; *p && *p != '\n'; p++) {}     /* find 1st '\n'  */
-      if (*p != '\n') {                   /* check line read */
-            int c;  /* discard remainder of line with getchar  */
-            while ((c = fgetc (fp)) != '\n' && c != EOF) {}
-        }
-      // *p = 0, n++;
-      *p = 0;                              /* nul-termiante  */
-      if (++n == maxl) { /* if limit reached, realloc lines  */
-          void *tmp = realloc (lines, 2 * maxl * sizeof *lines);
-          if (!tmp) {     /* validate realloc succeeded */
-              fprintf (stderr, "error: realloc - virtual memory exhausted.\n");
-              break;      /* on failure, exit with existing data */
-          }
-          lines = tmp;    /* assign reallocated block to lines */
-          maxl *= 2;      /* update maxl to reflect new size */
-      }                         /* nul-termiante  */
+  // iterate through each line in infile
+  while (n < maxLines && fgets (input[n], maxChars, fp)) {
+    // assign pointer to char array
+    char *chars = input[n];
+    // iterate until newline
+    for (; *chars && *chars != '\n'; chars++) {}
+    // check line is not empty
+    if (*chars != '\n') {
+      int chr;
+      do {
+      chr = fgetc(fp);
+      // discard unwanted input
+      } while ((chr != EOF) && (chr != '\n'));
+    }
+    // reset pointer
+    *chars = 0;
+    // if maxLines has been reached then we need to increase limit and allocate more memory
+    if (++n == maxLines) {
+      // allocate more memory to temp pointer
+      void *tmp = realloc (input, 2 * maxLines * sizeof *input);
+      // check that the allocation was possible
+      if (!tmp) {
+        fprintf (stderr, "Error: Insufficient memory to store board.\n");
+        exit(1);
+      }
+      // assign larger memory block to input
+      input = tmp;
+      // update new line limit
+      maxLines *= 2;
+    }
   }
-  if (fp != stdin) fclose (fp);   /* close file if not stdin */
-
-  /* print lines */
-  // printf("Original array: \n");
-  // for (i = 0; i < n; i++) printf ("%s\n", lines[i]);
-
-  free (lines);   /* free allocated memory */
-
+  // close file
+  if (fp != stdin){
+    fclose (fp);
+  }
+  // free memory
+  free (input);
 
   // choose sort type
   switch(sortType){
@@ -213,20 +224,20 @@ void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType, in
     default: 
       // check if reversed
       if (reverse == 0){
-        qsort(lines, n, sizeof(*lines), cmpfunc);
+        qsort(input, n, sizeof(*input), compareFunction);
         break;
       }else{
-        qsort(lines, n, sizeof(*lines), reversecmpfunc);
+        qsort(input, n, sizeof(*input), reverseCompareFunction);
         break; 
       }
 
     // numerical
     case 'n':
       if (reverse == 0){
-        qsort(lines, n, sizeof(*lines), numbercmpfunc);
+        qsort(input, n, sizeof(*input), numericCompareFunction);
         break;
       }else{
-        qsort(lines, n, sizeof(*lines), reversenumbercmpfunc);
+        qsort(input, n, sizeof(*input), reverseNumericCompareFunction);
         break;  
       }
   }
@@ -234,7 +245,6 @@ void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType, in
   // if file output
   if(outputType == 'f'){
     // file output logic
-    // writeToFile(outputFilename, lines, n);
     printf("writing......!");
     // int i = 0;
     FILE *f;
@@ -242,11 +252,11 @@ void ProcessFileAlt(FILE* fp, char* filename, char sortType, char outputType, in
     if ((f = fopen(outputFilename, "wb")) == NULL) {
       printf("Can't open file %s\n", outputFilename);
     }
-    for (i = 0; i < n; i++) fprintf (f, "%s\n", lines[i]);
+    for (int i = 0; i < n; i++) fprintf (f, "%s\n", input[i]);
     fclose(f);
   }else{
     /* print lines */
     printf("Sorted array: \n");
-    for (i = 0; i < n; i++) printf ("%s\n", lines[i]);
+    for (int i = 0; i < n; i++) printf ("%s\n", input[i]);
   }
 }

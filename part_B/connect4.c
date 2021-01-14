@@ -55,52 +55,52 @@ void read_in_file(FILE *infile, board u){
  
   // iterate through each line in infile
   while (n< maxHeight && fgets (u->rows[n], maxWidth, infile)) {
-      // if first line
-      if (n == 0){
-        // set linelength for number of characters in first line
-        lineLength = strlen(u->rows[n]) -1 ;
-        u->width = lineLength;
+    // if first line
+    if (n == 0){
+      // set linelength for number of characters in first line
+      lineLength = strlen(u->rows[n]) -1 ;
+      u->width = lineLength;
 
-        // incorrect board dimensions
-        if (lineLength <4 || lineLength > 512){
-          fprintf (stderr, "Error: Invalid board size.\n");
-          exit(1);
-        }          
-      }
+      // incorrect board dimensions
+      if (lineLength <4 || lineLength > 512){
+        fprintf (stderr, "Error: Invalid board size.\n");
+        exit(1);
+      }          
+    }
 
-      // check all lines are same length
-      if ((int) strlen(u->rows[n])-1 != lineLength){
-          fprintf (stderr, "Error: Invalid board size.\n");
-          exit(1);
+    // check all lines are same length
+    if ((int) strlen(u->rows[n])-1 != lineLength){
+        fprintf (stderr, "Error: Invalid board size.\n");
+        exit(1);
+    }
+    // assign pointer to char array
+    char *chars = u->rows[n];
+    // iterate until newline
+    for (; *chars && *chars != '\n'; chars++) {}
+    // check line is not empty
+    if (*chars != '\n') {
+      int chr;
+      do {
+      chr = fgetc(infile);
+      // discard unwanted input
+      } while ((chr != EOF) && (chr != '\n'));
+    }
+    // reset pointer
+    *chars = 0;
+    // if maxHeight has been reached then we need to increase limit and allocate more memory
+    if (++n == maxHeight) {
+      // allocate more memory to temp pointer
+      void *tmp = realloc (u->rows, 2 * maxHeight * sizeof *rows);
+      // check that the allocation was possible
+      if (!tmp) {
+        fprintf (stderr, "Error: Insufficient memory to store board.\n");
+        exit(1);
       }
-      // assign pointer to char array
-      char *p = u->rows[n];
-      // iterate until newline
-      for (; *p && *p != '\n'; p++) {}
-      // check line is not empty
-      if (*p != '\n') {
-        int chr;
-        do {
-        chr = fgetc(infile);
-        // discard unwanted input
-        } while ((chr != EOF) && (chr != '\n'));
-      }
-      // reset pointer
-      *p = 0;
-      // if maxHeight has been reached then we need to increase limit and allocate more memory
-      if (++n == maxHeight) {
-        // allocate more memory to temp pointer
-        void *tmp = realloc (u->rows, 2 * maxHeight * sizeof *rows);
-        // check that the allocation was possible
-        if (!tmp) {
-          fprintf (stderr, "Error: Insufficient memory to store board.\n");
-          exit(1);
-        }
-        // assign larger memory block to LINES (RENAME????)
-        u->rows = tmp;
-        // update new height limit
-        maxHeight *= 2;
-      }
+      // assign larger memory block to LINES (RENAME????)
+      u->rows = tmp;
+      // update new height limit
+      maxHeight *= 2;
+    }
   }
   // set board height
   u->height = n;
