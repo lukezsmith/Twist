@@ -6,21 +6,8 @@
 
 #include "sort.h"
 
-// rules
 
-// Lines starting with a number will appear before lines starting with a letter.
-// Lines starting with a letter that appears earlier in the alphabet will appear before lines starting with a letter that appears later in the alphabet.
-// Lines starting with a lowercase letter will appear before lines starting with the same letter in uppercase.
-
-// sort -r: Reverse the sorting order.
-// sort -o: Specify the output file.
-// sort -n: Use the numerical value to sort. e.g a list > names.txt
-// sort -h: option that outputs usage information and briefly explains how much of this part of the coursework you have managed to implement.
-
-// uses qsort() to actually sort
-
-// must use switch case to choose arguments. 
-
+// function that prints usage and brief overview to command line
 void display_usage_info(){
   printf("This is the usage for sort \n"
        "Valid options are:\n"
@@ -30,27 +17,52 @@ void display_usage_info(){
        "    -h: display usage information the program\n"
        "\n"
        "For this part of the coursework I have been able to implement all -r, -o, -n and -h options for both stdin input as well as file input.\n"
-       "Testing on MIRA, this sorting program produces identical outputs to the unix sort. \n"
+       "Testing on MIRA, this sorting program produces identical outputs to the unix sort for all arguments aside from numerical sort when the input is a non-numeric string. \n"
        "For this part I have made the assumption that the -h flag should behave identically to the --help flag on UNIX sort in that it overwrites all other flags and simply outputs this information. \n");
 }
 
+// function that compares two strings (lines)
 int compare_function (const void * a, const void * b) {
   return strcoll(a, b);
 }
 
+// function that compares two strings (lines) in reverse order
 int reverse_compare_function (const void * a, const void * b) {
   return strcoll(b, a);
 }
 
+// function that compares two strings (lines) numerically
 int numeric_compare_function(const void * a, const void * b) {
-  char * pa;
-  char * pb;
+  char *pa;
+  char *pb;
+
+  // pa = (char*) a;
+  // pb = (char*) b;
+
+  // char ca = pa[0];
+  // char cb = pb[0];
+  // printf("first char a: %c\n", ca);
+
 
   int a_numeric = (int) strtol(a, &pa , 10);
+  // printf("character: %s, integer val: %d\n", a, a_numeric);
+  // printf("numeric: %d\n", a_numeric);
   int b_numeric = (int) strtol(b, &pb, 10);
+  // printf("character: %s, integer val: %d\n", b, b_numeric);
+  // char ca = (char *) *a[0];
+  // char cb = (char *) *b[0];
+  // const char* *ca = a;
+  // const char* *cb = b;
+
+  // int a_numeric = atoi(&ca);
+  // printf("character: %c, integer val: %d\n", ca, a_numeric);
+  // int b_numeric = atoi(&cb);
+  // printf("character: %c, integer val: %d\n", cb,b_numeric);
+
   return (a_numeric - b_numeric);
 }
 
+// function that compares two strings (lines) numerically in reverse order
 int reverse_numeric_compare_function(const void * a, const void * b) {
   char * pa;
   char * pb;
@@ -63,94 +75,104 @@ int reverse_numeric_compare_function(const void * a, const void * b) {
 int main(int argc, char *argv[]){
   // bypass compilation warning
   (void) argc;
+  // string for output filename
   char (*output_filename) = "";
+  // string for input filename
   char (*filename) = "";
+  // initialise sort type to use default compare function
   char sort_type = 'd';
-  char output_type = 'c';
+  // initialise output to be stdout
+  char output_type = 's';
+  // initialise non-reverse compare 
   int reverse = 0;
-  FILE *fp;
-
+  // initialise filename to be unread
   int filename_flag = 0;
+  // file pointer for input file
+  FILE *fp;
 
   // set system locale
   setlocale(LC_ALL, "");
 
 
   // iterate through arguments
-
   while (*++argv){
+    // parse flag arguments
     if((*argv)[0] == '-'){
       switch ((*argv)[1]){
+        // fallback option when flag not found
         default: 
           printf("Unknown option -%c\n\n", (*argv)[1]);
           display_usage_info();
-          return 1;
+          exit(1);
         
+        // usage flag
         case 'h': 
-          // if file specified, process & sort using default
           // display usage info
           display_usage_info();
-          return 1;
+          // terminate program
+          exit(1);
 
+        // output flag
         case 'o': 
           output_type = 'f';
           // get filename 
           char* filename = (*++argv);
-          printf("output filename: %s\n", filename);
 
           // set filename 
           output_filename = filename;
-          // outputFilename = "TETS";
           break;          
         
+        // numerical flag
         case 'n':
+          // set numerical flag
           sort_type = 'n'; 
-          // process & sort using numerical compare function????
           break;          
 
+        // reverse flag
         case 'r': 
+          // set reverse flag
           reverse = 1;
-          // process & sort using reversed compare function
           break;
 
         // double hyphen arguments
         case '-':
           switch ((*argv)[2]){
+            // fallback option when flag not found
             default: 
               printf("sort: unrecognized option '--%c'\n", (*argv)[2]);
               printf("Try './sort -h for more information.\n");
-              // display_usage_info();
-              return 1;
+              exit(1);
             
+            // usage flag
             case 'h': 
-              // if file specified, process & sort using default
               // display usage info
               display_usage_info();
-              return 1;
+              exit(1);
 
+            // output flag
             case 'o': 
               output_type = 'f';
               // get filename 
               char* filename = (*++argv);
-              printf("output filename: %s\n", filename);
 
               // set filename 
               output_filename = filename;
               // outputFilename = "TETS";
               break;          
             
+            // numerical flag
             case 'n':
               sort_type = 'n'; 
               // process & sort using numerical compare function????
               break;          
 
+            // reverse flag
             case 'r': 
               reverse = 1;
               // process & sort using reversed compare function
               break;
           }
           break;
-
       }
     }else{
       // save filename if output not set yet
@@ -158,25 +180,23 @@ int main(int argc, char *argv[]){
         filename =(*argv);
         filename_flag = 1;
       }else{
-        // output has been set and so has a filename so we use stdin as input
-        if (filename_flag == 0){
-          process_file(stdin, sort_type, output_type, reverse, output_filename); 
+        // if output filename has already been set we check this argument to see if it is that
+        if((*argv) != output_filename){
+          filename =(*argv);
+          filename_flag = 1;
         }
       }
     }
   }
-  // if no arguments we use stdin without any flags
+  // if no arguments we use stdin
   if(filename_flag == 0){
-    // display_usage_info();
-    // return 1;
-    // process_stdin(sort_type, output_type, reverse, output_filename);
     process_file(stdin, sort_type, output_type, reverse, output_filename);
+    return 0;
   }else{
     // check file 
     if ((fp = fopen(filename, "r")) == NULL) {
-      printf("Can't open file %s\n", *argv);
-      // Program exits if file pointer returns NULL.
-      return 1;
+      fprintf (stderr, "Error: Can't open file %s\n", filename);
+      exit(1);
     }else{
       // process file
       process_file(fp, sort_type, output_type, reverse, output_filename);
@@ -185,26 +205,18 @@ int main(int argc, char *argv[]){
   }
 }
 
+// function that processes input, sorts and outputs results
 void process_file(FILE* fp, char sort_type, char output_type, int reverse, char* output_filename){
   int n = 0;
-  // int maxLines = 40;
   int max_lines = 10;
   int max_chars = 512;
-
-  // FILE* f;
-
-
-  // set input type
-  // if (input_type == 's'){
-  //   fp = stdin;
-  // }
 
   // create pointer to char array of size 512
   char (*input)[max_chars] = NULL;
 
   // check that the allocation was possible
   if (!(input = malloc (max_lines * sizeof *input))) { 
-    fprintf (stderr, "Error: Insufficient memory to text input.\n");
+    fprintf (stderr, "Error: Insufficient memory to store text input.\n");
     exit(1);
   }
 
@@ -243,8 +255,6 @@ void process_file(FILE* fp, char sort_type, char output_type, int reverse, char*
   if (fp != stdin){
     fclose (fp);
   }
-  // free memory
-  free (input);
 
   // choose sort type
   switch(sort_type){
@@ -276,7 +286,9 @@ void process_file(FILE* fp, char sort_type, char output_type, int reverse, char*
     FILE *f;
     // check file 
     if ((f = fopen(output_filename, "w")) == NULL) {
-      printf("Can't open file %s\n", output_filename);
+      // printf("Can't open file %s\n", output_filename);
+      fprintf (stderr, "Error: Can't open file %s\n", output_filename);
+      exit(1);
     }
     for (int i = 0; i < n; i++) fprintf (f, "%s\n", input[i]);
     fclose(f);
@@ -284,73 +296,6 @@ void process_file(FILE* fp, char sort_type, char output_type, int reverse, char*
     // print sorted input to stdout
     for (int i = 0; i < n; i++) printf ("%s\n", input[i]);
   }
+  // free memory
+  free (input);
 }
-
-// void process_stdin(char sort_type, char output_type, int reverse, char* output_filename){
-//   // get stdin
-//   // printf("Please enter a line:\n");
-//   // char *line = NULL;
-//   // size_t len = 0;
-//   // ssize_t lineSize = 0;
-//   // lineSize = getline(&line, &len, stdin);
-//   // printf("You entered %s, which has %zu chars.\n", line, lineSize - 1);
-//   // free(line);
-//   // // return 0;
-//   // line array
-//   char line[512];
-
-//   // array to store each line
-//   // input[]
-//   int n = 0;
-//   while (fgets(line, 512, stdin) != NULL) {
-//     // increment size of string array
-//     n +=1;
-//     // save line to lines array
-//   }
-//   printf("Lines from input:\n");
-//   for (int i = 0; i < n; i++){
-//     printf("%s\n", input[i]);
-//   }
-//   // sort
-
-//   // // choose sort type
-//   // switch(sort_type){
-//   //   // default comparison method
-//   //   default: 
-//   //     // check if reversed
-//   //     if (reverse == 0){
-//   //       qsort(input, n, sizeof(*input), compare_function);
-//   //       break;
-//   //     }else{
-//   //       qsort(input, n, sizeof(*input), reverse_compare_function);
-//   //       break; 
-//   //     }
-
-//   //   // numerical
-//   //   case 'n':
-//   //     if (reverse == 0){
-//   //       qsort(input, n, sizeof(*input), numeric_compare_function);
-//   //       break;
-//   //     }else{
-//   //       qsort(input, n, sizeof(*input), reverse_numeric_compare_function);
-//   //       break;  
-//   //     }
-//   // }
-
-//   // // output
-  
-//   // // if file output
-//   // if(output_type == 'f'){
-//   //   // file output logic
-//   //   FILE *f;
-//   //   // check file 
-//   //   if ((f = fopen(output_filename, "w")) == NULL) {
-//   //     printf("Can't open file %s\n", output_filename);
-//   //   }
-//   //   for (int i = 0; i < n; i++) fprintf (f, "%s\n", input[i]);
-//   //   fclose(f);
-//   // }else{
-//   //   // print sorted input to stdout
-//   //   for (int i = 0; i < n; i++) printf ("%s\n", input[i]);
-//   // }
-// }
