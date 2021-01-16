@@ -25,6 +25,7 @@ board setup_board(){
   if (!(B->rows = malloc (maxSize * sizeof (char *)))) {
     // not enough memory to assign
     fprintf (stderr, "Error: Insufficient memory to store board.\n");
+    free(B);
     exit(1);
   }
 
@@ -65,6 +66,8 @@ void read_in_file(FILE *infile, board u){
       // incorrect board dimensions
       if (lineLength <4 || lineLength > 512){
         fprintf (stderr, "Error: Invalid board size.\n");
+        cleanup_board(u);
+        fclose(infile);
         exit(1);
       }          
     }
@@ -72,6 +75,8 @@ void read_in_file(FILE *infile, board u){
     // check all lines are same length
     if ((int) strlen(u->rows[n])-1 != lineLength){
         fprintf (stderr, "Error: Invalid board size.\n");
+        cleanup_board(u);
+        fclose(infile);
         exit(1);
     }
     // assign pointer to char array
@@ -81,6 +86,8 @@ void read_in_file(FILE *infile, board u){
     for (int i = 0; i < lineLength; i++){
       if (chars[i] != '.' && chars[i] != 'x' && chars[i] != 'o' ){
         fprintf (stderr, "Error: Invalid token in board: '%c'.\n", chars[i]);
+        cleanup_board(u);
+        fclose(infile);
         exit(1);
       }
     }
@@ -104,6 +111,9 @@ void read_in_file(FILE *infile, board u){
       // check that the allocation was possible
       if (!tmp) {
         fprintf (stderr, "Error: Insufficient memory to store board.\n");
+        cleanup_board(u);
+        free(tmp);
+        fclose(infile);
         exit(1);
       }
       // assign larger memory block to LINES (RENAME????)
@@ -125,6 +135,8 @@ void read_in_file(FILE *infile, board u){
         for (int k = i; k< u->height; k++){
           if(u->rows[k][j] == '.'){
             fprintf (stderr, "Error: Invalid board. Gravity not applied to input file.\n");
+            cleanup_board(u);
+            fclose(infile);
             exit(1); 
           }
         }

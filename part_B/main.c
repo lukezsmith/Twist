@@ -4,7 +4,8 @@ int main(){
   FILE *infile,*outfile;
 
   board my_board=setup_board();
-  infile=fopen("initial_board.txt","r");
+  // infile=fopen("initial_board.txt","r");
+  infile=fopen("./test_board_files/1x9.txt","r");
   read_in_file(infile,my_board);
   fclose(infile);
 
