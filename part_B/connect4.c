@@ -7,28 +7,31 @@
 #include <ctype.h>
 #include"connect4.h"
 
+// structure that stores the board
 struct board_structure {
   char (*rows)[512];
   int height;
   int width;
 };
 
+// function that initialises and allocates memory to board 
 board setup_board(){
   // initial row and column size in order to play connect4
-  int maxSize = 512;
+  int max_size = 512;
 
   // allocate memory for board struct
   struct board_structure *B;
   B = (struct board_structure *) malloc(sizeof(struct board_structure));
 
   // dynamically allocate memory for dynamic amount of rows
-  if (!(B->rows = malloc (maxSize * sizeof (char *)))) {
+  if (!(B->rows = malloc (max_size * sizeof (char *)))) {
     // not enough memory to assign
     fprintf (stderr, "Error: Insufficient memory to store board.\n");
     free(B);
     exit(1);
   }
 
+  // set board height and width initially to 4
   B->height = 4;
   B->width = 4;
 
@@ -37,6 +40,7 @@ board setup_board(){
 
 }
 
+// function that cleans the board and frees allocated board memory
 void cleanup_board(board u){
   // free dynamically allocated board row memory
   free(u->rows);
@@ -44,27 +48,37 @@ void cleanup_board(board u){
   free(u);
 }
 
+// function that reads the input file and builds the board
 void read_in_file(FILE *infile, board u){
+  // variable that counts number of lines in the input file
   int n = 0;
-  int lineLength = 0;
-  int maxHeight = 4;
-  // int maxWidth = 512;
-  int maxWidth = 515;
+  // variable that counts the number of characters in each line of the input file
+  int line_length = 0;
+  // initial maximum number of rows (lines) to the board
+  int max_height = 4;
+  // maximum number of characters to handle in each row of the board
+  int max_width = 515;
    
   // create pointer to char array of size 512
-  char (*rows)[maxWidth] = NULL;
+  char (*rows)[max_width] = NULL;
 
+  // check input file is valid
+  if (infile == NULL) {
+    fprintf (stderr, "Error: Can't open input file.\n");
+    cleanup_board(u);
+    exit(1);
+  }
  
   // iterate through each line in infile
-  while (n< maxHeight && fgets (u->rows[n], maxWidth, infile)) {
+  while (n< max_height && fgets (u->rows[n], max_width, infile)) {
     // if first line
     if (n == 0){
       // set linelength for number of characters in first line
-      lineLength = strlen(u->rows[n]) -1 ;
-      u->width = lineLength;
+      line_length = strlen(u->rows[n]) -1 ;
+      u->width = line_length;
 
       // incorrect board dimensions
-      if (lineLength <4 || lineLength > 512){
+      if (line_length <4 || line_length > 512){
         fprintf (stderr, "Error: Invalid board size.\n");
         cleanup_board(u);
         fclose(infile);
@@ -73,7 +87,7 @@ void read_in_file(FILE *infile, board u){
     }
 
     // check all lines are same length
-    if ((int) strlen(u->rows[n])-1 != lineLength){
+    if ((int) strlen(u->rows[n])-1 != line_length){
         fprintf (stderr, "Error: Invalid board size.\n");
         cleanup_board(u);
         fclose(infile);
@@ -83,7 +97,7 @@ void read_in_file(FILE *infile, board u){
     char *chars = u->rows[n];
 
     // check characters are all valid
-    for (int i = 0; i < lineLength; i++){
+    for (int i = 0; i < line_length; i++){
       if (chars[i] != '.' && chars[i] != 'x' && chars[i] != 'o' ){
         fprintf (stderr, "Error: Invalid token in board: '%c'.\n", chars[i]);
         cleanup_board(u);
@@ -104,10 +118,10 @@ void read_in_file(FILE *infile, board u){
     }
     // reset pointer
     *chars = 0;
-    // if maxHeight has been reached then we need to increase limit and allocate more memory
-    if (++n == maxHeight) {
+    // if max_height has been reached then we need to increase limit and allocate more memory
+    if (++n == max_height) {
       // allocate more memory to temp pointer
-      void *tmp = realloc (u->rows, 2 * maxHeight * sizeof *rows);
+      void *tmp = realloc (u->rows, 2 * max_height * sizeof *rows);
       // check that the allocation was possible
       if (!tmp) {
         fprintf (stderr, "Error: Insufficient memory to store board.\n");
@@ -119,7 +133,7 @@ void read_in_file(FILE *infile, board u){
       // assign larger memory block to LINES (RENAME????)
       u->rows = tmp;
       // update new height limit
-      maxHeight *= 2;
+      max_height *= 2;
     }
   }
   // set board height
@@ -145,7 +159,9 @@ void read_in_file(FILE *infile, board u){
   }
 }
 
+// function that writes the current state of the board to specified file pointer
 void write_out_file(FILE *outfile, board u){
+  // array that holds each player's token
   char symbols[] =  {'x', 'o'};
 
   // flag to register a winning line for each player
@@ -154,33 +170,14 @@ void write_out_file(FILE *outfile, board u){
 
   // check for winner
   for (int k = 0; k < 2; k++){
-    // horizontal win check
-    // for (int j = 0; j<u->width-3 ; j++ ){
-    //   for (int i = 0; i<u->height; i++){
-    //     if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
-    //       if (k == 0 && x_win == 0){
-    //         x_win = 1;
-    //         // capitalise symbols
-    //         u->rows[i][j] = toupper(symbols[k]);
-    //         u->rows[i][j+1] = toupper(symbols[k]);
-    //         u->rows[i][j+2] = toupper(symbols[k]);
-    //         u->rows[i][j+3] = toupper(symbols[k]);
-    //       }
-
-    //       if (k == 1 && o_win == 0){
-    //         o_win = 1;
-    //         // capitalise symbols
-    //         u->rows[i][j] = toupper(symbols[k]);
-    //         u->rows[i][j+1] = toupper(symbols[k]);
-    //         u->rows[i][j+2] = toupper(symbols[k]);
-    //         u->rows[i][j+3] = toupper(symbols[k]);
-    //       }
-    //     }           
-    //   }
-    // }
+    //horizontal win check
+    
+    // iterate over the board
     for (int j = 0; j<u->width ; j++ ){
       for (int i = 0; i<u->height; i++){
+        // check if each respective board position is the same: i.e four in a row
         if (u->rows[i][j] == symbols[k] && u->rows[i][(j+1)% u->width] == symbols[k] && u->rows[i][(j+2)% u->width] == symbols[k] && u->rows[i][(j+3)% u->width] == symbols[k]){
+          // if the token is x and x hasn't already won we flag the win and capitalise the tokens to indicate a win
           if (k == 0 && x_win == 0){
             x_win = 1;
             // capitalise symbols
@@ -190,6 +187,7 @@ void write_out_file(FILE *outfile, board u){
             u->rows[i][(j+3)% u->width] = toupper(symbols[k]);
           }
 
+          // if the token is o and o hasn't already won we flag the win and capitalise the tokens to indicate a win
           if (k == 1 && o_win == 0){
             o_win = 1;
             // capitalise symbols
@@ -202,9 +200,13 @@ void write_out_file(FILE *outfile, board u){
       }
     }
     // vertical win check
+        
+    // iterate over the board
     for (int i = 0; i<u->height-3; i++ ){
       for (int j = 0; j<u->width; j++){
+        // check if each respective board position is the same: i.e four in a row
         if (u->rows[i][j] == symbols[k] && u->rows[i+1][j] == symbols[k] && u->rows[i+2][j] == symbols[k] && u->rows[i+3][j] == symbols[k]){
+          // if the token is x and x hasn't already won we flag the win and capitalise the tokens to indicate a win
           if (k == 0 && x_win == 0){
             x_win = 1;
             // capitalise symbols
@@ -214,6 +216,7 @@ void write_out_file(FILE *outfile, board u){
             u->rows[i+3][j] = toupper(symbols[k]);
           }
 
+          // if the token is o and o hasn't already won we flag the win and capitalise the tokens to indicate a win
           if (k == 1 && o_win == 0){
             o_win = 1;
             // capitalise symbols
@@ -226,9 +229,13 @@ void write_out_file(FILE *outfile, board u){
       }
     }
     // diagonal (ascending) win check
+            
+    // iterate over the board
     for (int i=3; i<u->height; i++){
       for (int j=0; j<u->width; j++){
+        // check if each respective board position is the same: i.e four in a row
         if (u->rows[i][j] == symbols[k] && u->rows[i-1][(j+1) % u->width] == symbols[k] && u->rows[i-2][(j+2) % u->width] == symbols[k] && u->rows[i-3][(j+3) % u->width] == symbols[k]){
+          // if the token is x and x hasn't already won we flag the win and capitalise the tokens to indicate a win
           if (k == 0 && x_win == 0){
             x_win = 1;
             // capitalise symbols
@@ -238,6 +245,7 @@ void write_out_file(FILE *outfile, board u){
             u->rows[i-3][(j+3) % u->width] = toupper(symbols[k]);
           }
 
+          // if the token is o and o hasn't already won we flag the win and capitalise the tokens to indicate a win
           if (k == 1 && o_win == 0){
             o_win = 1;
             // capitalise symbols
@@ -249,16 +257,14 @@ void write_out_file(FILE *outfile, board u){
         }
       }
     }
-        // diagonal (descending) win check
+    // diagonal (descending) win check
+                
+    // iterate over the board
     for (int i=3; i<u->height; i++){
-      // printf("line: %s\n", u->rows[i]);
       for (int j=0; j< u->width; j++){
-        // printf("-----------------------------------------------------------------\n\n");
-        // printf("token: %c\n", u->rows[i][j]);
-        // printf("token: %c\n", u->rows[i-1][(j-1) % u->width]);
-        // printf("token: %c\n", u->rows[i-2][(j-2) % u->width]);
-        // printf("token: %c\n", u->rows[i-3][(j-3) % u->width]);
+        // check if each respective board position is the same: i.e four in a row
         if (u->rows[i][j] == symbols[k] && u->rows[i-1][(unsigned int) (j-1) % u->width] == symbols[k] &&  u->rows[i-2][(unsigned int) (j-2) % u->width] ==symbols[k] && u->rows[i-3][(unsigned int) (j-3) % u->width] == symbols[k]){
+          // if the token is x and x hasn't already won we flag the win and capitalise the tokens to indicate a win
           if (k == 0 && x_win == 0){
             x_win = 1;
             // capitalise symbols
@@ -268,6 +274,7 @@ void write_out_file(FILE *outfile, board u){
             u->rows[i-3][(unsigned int) (j-3) % u->width] = toupper(symbols[k]);
           }
 
+          // if the token is o and o hasn't already won we flag the win and capitalise the tokens to indicate a win
           if (k == 1 && o_win == 0){
             o_win = 1;
             // capitalise symbols
@@ -281,11 +288,7 @@ void write_out_file(FILE *outfile, board u){
     }
   }
 
-  // for (int i = 0; i < u->height; i++){
-  //   fprintf (outfile, "%s\n", u->rows[i]);
-  // }
-  // return;
-  // output board
+  // print output to file pointer
   for (int i = 0; i < u->height; i++){
     fprintf (outfile, "%s\n", u->rows[i]);
   }
@@ -293,7 +296,9 @@ void write_out_file(FILE *outfile, board u){
 
 }
 
+// function that returns the token of the next player
 char next_player(board u){
+  // variable that counts the number of tokens in the board
   int token_count = 0;
 
   // count tokens on board
@@ -315,8 +320,11 @@ char next_player(board u){
 
 }
 
+// function that returns the current winner of the board
 char current_winner(board u){
+  // variable that indicates if there is a free space on the board or not
   int emptySpace = 1;
+  // array containing the winning player's tokens
   char symbols[] =  {'X', 'O'};
   // flag to register a winning line for each player
   int x_win = 0;
@@ -324,65 +332,70 @@ char current_winner(board u){
   
   // check for winner
   for (int k = 0; k < 2; k++){
-    // horizontal win check
-    // for (int j = 0; j<u->width-3 ; j++ ){
-    //   for (int i = 0; i<u->height; i++){
-    //     if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
-    //       // return symbols[k];
-    //       if (k == 0){
-    //         x_win = 1;
-    //       }else{
-    //         o_win = 1;
-    //       }
-    //     }           
-    //   }
-    // }
+
+    //horizontal win check
+
+    // iterate over the board
     for (int j = 0; j<u->width; j++ ){
       for (int i = 0; i<u->height; i++){
+        // check if each respective board position is the same: i.e four in a row
         if (u->rows[i][j] == symbols[k] && u->rows[i][(j+1) % u->width] == symbols[k] && u->rows[i][(j+2)% u->width] == symbols[k] && u->rows[i][(j+3) % u->width] == symbols[k]){
-          // return symbols[k];
+          // if x win 
           if (k == 0){
             x_win = 1;
           }else{
+            // o win
             o_win = 1;
           }
         }           
       }
     }
     // vertical win check
+
+    // iterate over the board
     for (int i = 0; i<u->height-3; i++ ){
       for (int j = 0; j<u->width; j++){
+        // check if each respective board position is the same: i.e four in a row
         if (u->rows[i][j] == symbols[k] && u->rows[i+1][j] == symbols[k] && u->rows[i+2][j] == symbols[k] && u->rows[i+3][j] == symbols[k]){
-          // return symbols[k];
+          // if x win 
           if (k == 0){
             x_win = 1;
           }else{
+            // o win
             o_win = 1;
           }
         }           
       }
     }
     // diagonal (ascending) win check 
+
+    // iterate over the board
     for (int i=3; i<u->height; i++){
       for (int j=0; j<u->width; j++){
+        // check if each respective board position is the same: i.e four in a row
         if (u->rows[i][j] == symbols[k] && u->rows[i-1][(j+1)% u->width] == symbols[k] && u->rows[i-2][(j+2)% u->width] == symbols[k] && u->rows[i-3][(j+3)% u->width] == symbols[k]){
-          // return symbols[k];
+          // if x win 
           if (k == 0){
             x_win = 1;
           }else{
+            // o win
             o_win = 1;
           }
         }
       }
     }
     // diagonal (descending) win check
+
+    // iterate over the board
     for (int i=3; i<u->height; i++){
       for (int j=0; j< u->width; j++){
+        // check if each respective board position is the same: i.e four in a row
         if (u->rows[i][j] == symbols[k] && u->rows[i-1][(unsigned int)(j-1)% u->width] == symbols[k] && u->rows[i-2][(unsigned int)(j-2)% u->width] ==symbols[k] && u->rows[i-3][(unsigned int)(j-3)% u->width] == symbols[k]){
-          // return symbols[k];
+          // if x win 
           if (k == 0){
             x_win = 1;
           }else{
+            // o win
             o_win = 1;
           }
         }
@@ -390,7 +403,7 @@ char current_winner(board u){
     }
   }
 
-  // check for winners
+  // check for winners and return the winner's character
   if(x_win == 1 && o_win == 0){
     return 'X';
   }
@@ -418,13 +431,17 @@ char current_winner(board u){
   return '.';
 }
 
+// function that reads in the next player's move
 struct move read_in_move(board u){
+  // function that stores the move's row and column numbers
   int col;
   int row;
 
   // get user's column
   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
+  // checks that the user input is numeric
   while(scanf("%d", &col) != 1){
+    // if not numeric we display the error message and re-prompt
     int chr;
     fprintf(stderr, "Error: Invalid input, please enter a number.\n");
     printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
@@ -435,7 +452,9 @@ struct move read_in_move(board u){
 
   // get user's row
   printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
+  // checks that the user input is numeric
   while(scanf("%d", &row) != 1){
+    // if not numeric we display the error message and re-prompt
     int chr;
     fprintf(stderr, "Error: Invalid input, please enter a number.\n");
     printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
@@ -450,6 +469,7 @@ struct move read_in_move(board u){
   return my_move;
 }
 
+// function that checks if the user's move is valid or not
 int is_valid_move(struct move m, board u){
 
   // check column is valid
@@ -471,6 +491,7 @@ int is_valid_move(struct move m, board u){
   }
 }
 
+// function that checks if the specified move will result in a win, draw or otherwise
 char is_winning_move(struct move m, board u){
   // create a temporary board structure
   struct board_structure *tempBoard;
@@ -509,15 +530,15 @@ char is_winning_move(struct move m, board u){
     }
 
   }else{
-    // not
     // invalid move so no one wins/draws
     return '.';
   }
 }
 
+// function that plays the user's move 
 void play_move(struct move m, board u){
   // place token in col
-  for (int i = u->height; i >= 0; i--){
+  for (int i = u->height-1; i >= 0; i--){
     if (u->rows[i][m.column-1] == '.'){
       // there is an available slot, so we place next player's token there
       u->rows[i][m.column-1] = next_player(u);
@@ -537,7 +558,7 @@ void play_move(struct move m, board u){
       // place the previous rightmost token in the first column
       u->rows[u->height-abs(m.row)][0] = tempData;
     }else{
-    // if leftward twist
+      // if leftward twist
       // temporarily store first column token
       char tempData  = u->rows[u->height-abs(m.row)][0];
       // shift each column to the left by one position

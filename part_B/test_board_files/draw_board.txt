@@ -1,6 +1,6 @@
-xxx.oxxo
-xxxoxoxo
-oooxooxo
-xxoxoxox
-oooxoxox
+xox.oxxo
+xxxoxooo
+oooxooxx
+xxoxxxox
+oooxooox
 oxxoxoxo
