@@ -3,4 +3,4 @@
 ox.x...x
 xxox...x
 oooo...o
-oxo.xo.x
+oxoxxo.x

@@ -18,3 +18,6 @@ void play_move(struct move m, board u);
 
 char current_winner(board u); 
 char next_player(board u); 
+
+
+

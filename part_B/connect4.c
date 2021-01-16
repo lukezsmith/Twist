@@ -47,7 +47,8 @@ void read_in_file(FILE *infile, board u){
   int n = 0;
   int lineLength = 0;
   int maxHeight = 4;
-  int maxWidth = 512;
+  // int maxWidth = 512;
+  int maxWidth = 515;
    
   // create pointer to char array of size 512
   char (*rows)[maxWidth] = NULL;
@@ -75,8 +76,17 @@ void read_in_file(FILE *infile, board u){
     }
     // assign pointer to char array
     char *chars = u->rows[n];
+
+    // check characters are all valid
+    for (int i = 0; i < lineLength; i++){
+      if (chars[i] != '.' && chars[i] != 'x' && chars[i] != 'o' ){
+        fprintf (stderr, "Error: Invalid token in board: '%c'.\n", chars[i]);
+        exit(1);
+      }
+    }
     // iterate until newline
-    for (; *chars && *chars != '\n'; chars++) {}
+    for (; *chars && *chars != '\n'; chars++) {
+    }
     // check line is not empty
     if (*chars != '\n') {
       int chr;
@@ -104,26 +114,78 @@ void read_in_file(FILE *infile, board u){
   }
   // set board height
   u->height = n;
+
+  // we now check to see if the input file's tokens follow gravity correctly
+  // iterate through board tokens
+  for(int i = 0; i < u->height; i++){
+    for (int j = 0; j <u->width; j++){
+      // if player token found
+      if (u->rows[i][j]!= '.'){
+        // check all tokens below are also not .
+        for (int k = i; k< u->height; k++){
+          if(u->rows[k][j] == '.'){
+            fprintf (stderr, "Error: Invalid board. Gravity not applied to input file.\n");
+            exit(1); 
+          }
+        }
+      }
+    }
+  }
 }
 
 void write_out_file(FILE *outfile, board u){
   char symbols[] =  {'x', 'o'};
 
+  // flag to register a winning line for each player
+  int x_win = 0;
+  int o_win = 0;
+
   // check for winner
   for (int k = 0; k < 2; k++){
     // horizontal win check
-    for (int j = 0; j<u->width-3 ; j++ ){
+    // for (int j = 0; j<u->width-3 ; j++ ){
+    //   for (int i = 0; i<u->height; i++){
+    //     if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
+    //       if (k == 0 && x_win == 0){
+    //         x_win = 1;
+    //         // capitalise symbols
+    //         u->rows[i][j] = toupper(symbols[k]);
+    //         u->rows[i][j+1] = toupper(symbols[k]);
+    //         u->rows[i][j+2] = toupper(symbols[k]);
+    //         u->rows[i][j+3] = toupper(symbols[k]);
+    //       }
+
+    //       if (k == 1 && o_win == 0){
+    //         o_win = 1;
+    //         // capitalise symbols
+    //         u->rows[i][j] = toupper(symbols[k]);
+    //         u->rows[i][j+1] = toupper(symbols[k]);
+    //         u->rows[i][j+2] = toupper(symbols[k]);
+    //         u->rows[i][j+3] = toupper(symbols[k]);
+    //       }
+    //     }           
+    //   }
+    // }
+    for (int j = 0; j<u->width ; j++ ){
       for (int i = 0; i<u->height; i++){
-        if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
-          // capitalise symbols
-          u->rows[i][j] = toupper(symbols[k]);
-          u->rows[i][j+1] = toupper(symbols[k]);
-          u->rows[i][j+2] = toupper(symbols[k]);
-          u->rows[i][j+3] = toupper(symbols[k]);
-            for (int i = 0; i < u->height; i++){
-              fprintf (outfile, "%s\n", u->rows[i]);
+        if (u->rows[i][j] == symbols[k] && u->rows[i][(j+1)% u->width] == symbols[k] && u->rows[i][(j+2)% u->width] == symbols[k] && u->rows[i][(j+3)% u->width] == symbols[k]){
+          if (k == 0 && x_win == 0){
+            x_win = 1;
+            // capitalise symbols
+            u->rows[i][j] = toupper(symbols[k]);
+            u->rows[i][(j+1)% u->width] = toupper(symbols[k]);
+            u->rows[i][(j+2)% u->width] = toupper(symbols[k]);
+            u->rows[i][(j+3)% u->width] = toupper(symbols[k]);
           }
-          return;
+
+          if (k == 1 && o_win == 0){
+            o_win = 1;
+            // capitalise symbols
+            u->rows[i][j] = toupper(symbols[k]);
+            u->rows[i][(j+1)% u->width] = toupper(symbols[k]);
+            u->rows[i][(j+2)% u->width] = toupper(symbols[k]);
+            u->rows[i][(j+3)% u->width] = toupper(symbols[k]);
+          }
         }           
       }
     }
@@ -131,52 +193,87 @@ void write_out_file(FILE *outfile, board u){
     for (int i = 0; i<u->height-3; i++ ){
       for (int j = 0; j<u->width; j++){
         if (u->rows[i][j] == symbols[k] && u->rows[i+1][j] == symbols[k] && u->rows[i+2][j] == symbols[k] && u->rows[i+3][j] == symbols[k]){
-          // capitalise symbols
-          u->rows[i][j] = toupper(symbols[k]);
-          u->rows[i+1][j] = toupper(symbols[k]);
-          u->rows[i+2][j] = toupper(symbols[k]);
-          u->rows[i+3][j] = toupper(symbols[k]);
-          for (int i = 0; i < u->height; i++){
-              fprintf (outfile, "%s\n", u->rows[i]);
+          if (k == 0 && x_win == 0){
+            x_win = 1;
+            // capitalise symbols
+            u->rows[i][j] = toupper(symbols[k]);
+            u->rows[i+1][j] = toupper(symbols[k]);
+            u->rows[i+2][j] = toupper(symbols[k]);
+            u->rows[i+3][j] = toupper(symbols[k]);
           }
-          return;
+
+          if (k == 1 && o_win == 0){
+            o_win = 1;
+            // capitalise symbols
+            u->rows[i][j] = toupper(symbols[k]);
+            u->rows[i+1][j] = toupper(symbols[k]);
+            u->rows[i+2][j] = toupper(symbols[k]);
+            u->rows[i+3][j] = toupper(symbols[k]);
+          }
         }           
       }
     }
     // diagonal (ascending) win check
     for (int i=3; i<u->height; i++){
-      for (int j=0; j<u->width-3; j++){
-        if (u->rows[i][j] == symbols[k] && u->rows[i-1][j+1] == symbols[k] && u->rows[i-2][j+2] == symbols[k] && u->rows[i-3][j+3] == symbols[k]){
-          // capitalise symbols
-          u->rows[i][j] = toupper(symbols[k]);
-          u->rows[i-1][j+1] = toupper(symbols[k]);
-          u->rows[i-2][j+2] = toupper(symbols[k]);
-          u->rows[i-3][j+3] = toupper(symbols[k]);
-          for (int i = 0; i < u->height; i++){
-              fprintf (outfile, "%s\n", u->rows[i]);
+      for (int j=0; j<u->width; j++){
+        if (u->rows[i][j] == symbols[k] && u->rows[i-1][(j+1) % u->width] == symbols[k] && u->rows[i-2][(j+2) % u->width] == symbols[k] && u->rows[i-3][(j+3) % u->width] == symbols[k]){
+          if (k == 0 && x_win == 0){
+            x_win = 1;
+            // capitalise symbols
+            u->rows[i][j] = toupper(symbols[k]);
+            u->rows[i-1][(j+1) % u->width] = toupper(symbols[k]);
+            u->rows[i-2][(j+2) % u->width] = toupper(symbols[k]);
+            u->rows[i-3][(j+3) % u->width] = toupper(symbols[k]);
           }
-          return;
+
+          if (k == 1 && o_win == 0){
+            o_win = 1;
+            // capitalise symbols
+            u->rows[i][j] = toupper(symbols[k]);
+            u->rows[i-1][(j+1) % u->width] = toupper(symbols[k]);
+            u->rows[i-2][(j+2) % u->width] = toupper(symbols[k]);
+            u->rows[i-3][(j+3) % u->width] = toupper(symbols[k]);
+          }
         }
       }
     }
         // diagonal (descending) win check
     for (int i=3; i<u->height; i++){
-      for (int j=3; j< u->width; j++){
-        if (u->rows[i][j] == symbols[k] && u->rows[i-1][j-1] == symbols[k] && u->rows[i-2][j-2] ==symbols[k] && u->rows[i-3][j-3] == symbols[k]){
-          // capitalise symbols
-          u->rows[i][j] = toupper(symbols[k]);
-          u->rows[i-1][j-1] = toupper(symbols[k]);
-          u->rows[i-2][j-2] = toupper(symbols[k]);
-          u->rows[i-3][j-3] = toupper(symbols[k]);
-          for (int i = 0; i < u->height; i++){
-              fprintf (outfile, "%s\n", u->rows[i]);
+      // printf("line: %s\n", u->rows[i]);
+      for (int j=0; j< u->width; j++){
+        // printf("-----------------------------------------------------------------\n\n");
+        // printf("token: %c\n", u->rows[i][j]);
+        // printf("token: %c\n", u->rows[i-1][(j-1) % u->width]);
+        // printf("token: %c\n", u->rows[i-2][(j-2) % u->width]);
+        // printf("token: %c\n", u->rows[i-3][(j-3) % u->width]);
+        if (u->rows[i][j] == symbols[k] && u->rows[i-1][(unsigned int) (j-1) % u->width] == symbols[k] &&  u->rows[i-2][(unsigned int) (j-2) % u->width] ==symbols[k] && u->rows[i-3][(unsigned int) (j-3) % u->width] == symbols[k]){
+          if (k == 0 && x_win == 0){
+            x_win = 1;
+            // capitalise symbols
+            u->rows[i][j] = toupper(symbols[k]);
+            u->rows[i-1][(unsigned int) (j-1)% u->width] = toupper(symbols[k]);
+            u->rows[i-2][(unsigned int) (j-2) % u->width] = toupper(symbols[k]);
+            u->rows[i-3][(unsigned int) (j-3) % u->width] = toupper(symbols[k]);
           }
-          return;              
+
+          if (k == 1 && o_win == 0){
+            o_win = 1;
+            // capitalise symbols
+            u->rows[i][j] = toupper(symbols[k]);
+            u->rows[i-1][(unsigned int)(j-1)% u->width] = toupper(symbols[k]);
+            u->rows[i-2][(unsigned int)(j-2)% u->width] = toupper(symbols[k]);
+            u->rows[i-3][(unsigned int)(j-3)% u->width] = toupper(symbols[k]);
+          }
         }
       }
     }
   }
-  // no winners
+
+  // for (int i = 0; i < u->height; i++){
+  //   fprintf (outfile, "%s\n", u->rows[i]);
+  // }
+  // return;
+  // output board
   for (int i = 0; i < u->height; i++){
     fprintf (outfile, "%s\n", u->rows[i]);
   }
@@ -209,14 +306,34 @@ char next_player(board u){
 char current_winner(board u){
   int emptySpace = 1;
   char symbols[] =  {'X', 'O'};
+  // flag to register a winning line for each player
+  int x_win = 0;
+  int o_win = 0;
   
   // check for winner
   for (int k = 0; k < 2; k++){
     // horizontal win check
-    for (int j = 0; j<u->width-3 ; j++ ){
+    // for (int j = 0; j<u->width-3 ; j++ ){
+    //   for (int i = 0; i<u->height; i++){
+    //     if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
+    //       // return symbols[k];
+    //       if (k == 0){
+    //         x_win = 1;
+    //       }else{
+    //         o_win = 1;
+    //       }
+    //     }           
+    //   }
+    // }
+    for (int j = 0; j<u->width; j++ ){
       for (int i = 0; i<u->height; i++){
-        if (u->rows[i][j] == symbols[k] && u->rows[i][j+1] == symbols[k] && u->rows[i][j+2] == symbols[k] && u->rows[i][j+3] == symbols[k]){
-          return symbols[k];
+        if (u->rows[i][j] == symbols[k] && u->rows[i][(j+1) % u->width] == symbols[k] && u->rows[i][(j+2)% u->width] == symbols[k] && u->rows[i][(j+3) % u->width] == symbols[k]){
+          // return symbols[k];
+          if (k == 0){
+            x_win = 1;
+          }else{
+            o_win = 1;
+          }
         }           
       }
     }
@@ -224,29 +341,55 @@ char current_winner(board u){
     for (int i = 0; i<u->height-3; i++ ){
       for (int j = 0; j<u->width; j++){
         if (u->rows[i][j] == symbols[k] && u->rows[i+1][j] == symbols[k] && u->rows[i+2][j] == symbols[k] && u->rows[i+3][j] == symbols[k]){
-          return symbols[k];
+          // return symbols[k];
+          if (k == 0){
+            x_win = 1;
+          }else{
+            o_win = 1;
+          }
         }           
       }
     }
     // diagonal (ascending) win check 
     for (int i=3; i<u->height; i++){
-      for (int j=0; j<u->width-3; j++){
-        if (u->rows[i][j] == symbols[k] && u->rows[i-1][j+1] == symbols[k] && u->rows[i-2][j+2] == symbols[k] && u->rows[i-3][j+3] == symbols[k]){
-          return symbols[k];
+      for (int j=0; j<u->width; j++){
+        if (u->rows[i][j] == symbols[k] && u->rows[i-1][(j+1)% u->width] == symbols[k] && u->rows[i-2][(j+2)% u->width] == symbols[k] && u->rows[i-3][(j+3)% u->width] == symbols[k]){
+          // return symbols[k];
+          if (k == 0){
+            x_win = 1;
+          }else{
+            o_win = 1;
+          }
         }
       }
     }
     // diagonal (descending) win check
     for (int i=3; i<u->height; i++){
-      for (int j=3; j< u->width; j++){
-        if (u->rows[i][j] == symbols[k] && u->rows[i-1][j-1] == symbols[k] && u->rows[i-2][j-2] ==symbols[k] && u->rows[i-3][j-3] == symbols[k]){
-          return symbols[k];
+      for (int j=0; j< u->width; j++){
+        if (u->rows[i][j] == symbols[k] && u->rows[i-1][(unsigned int)(j-1)% u->width] == symbols[k] && u->rows[i-2][(unsigned int)(j-2)% u->width] ==symbols[k] && u->rows[i-3][(unsigned int)(j-3)% u->width] == symbols[k]){
+          // return symbols[k];
+          if (k == 0){
+            x_win = 1;
+          }else{
+            o_win = 1;
+          }
         }
       }
     }
   }
 
-    // check board is not full
+  // check for winners
+  if(x_win == 1 && o_win == 0){
+    return 'X';
+  }
+  if(x_win == 0 && o_win == 1){
+    return 'O';
+  }
+  if(x_win == 1 && o_win == 1){
+    return 'd';
+  }
+
+  // check board is not full
   for (int i = 0; i < u->height; i++){
     for (int j = 0; j < u->width; j++){
       if (u->rows[i][j] == '.'){
@@ -271,7 +414,7 @@ struct move read_in_move(board u){
   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
   while(scanf("%d", &col) != 1){
     int chr;
-    printf("Invalid input...\n");
+    fprintf(stderr, "Error: Invalid input, please enter a number.\n");
     printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
     do {
       chr = getchar();
@@ -282,7 +425,7 @@ struct move read_in_move(board u){
   printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
   while(scanf("%d", &row) != 1){
     int chr;
-    printf("Invalid input...\n");
+    fprintf(stderr, "Error: Invalid input, please enter a number.\n");
     printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
     do {
         chr = getchar();
@@ -299,7 +442,7 @@ int is_valid_move(struct move m, board u){
 
   // check column is valid
   if(m.column > u->width+1 || m.column < 1 || abs(m.row) > u->height){
-    printf("Not a valid move\n");
+    fprintf(stderr, "Error: Not a valid move.\n");
     return 0;
   }else{
     // find next available slot in selected column
@@ -311,6 +454,7 @@ int is_valid_move(struct move m, board u){
       }
     }
     // if no space return false
+    fprintf(stderr, "Error: Not a valid move.\n");
     return 0;
   }
 }
@@ -333,7 +477,6 @@ char is_winning_move(struct move m, board u){
 
     // check if move yields a winner
     char winner = current_winner(tempBoard);
-    printf("winner: %c\n", winner);
 
     // if winner is . it could currently be a draw OR there is no winner yet
     if (winner == '.'){
@@ -355,7 +498,6 @@ char is_winning_move(struct move m, board u){
 
   }else{
     // not
-    printf("Invalid move\n");
     // invalid move so no one wins/draws
     return '.';
   }
