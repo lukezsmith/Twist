@@ -440,34 +440,18 @@ struct move read_in_move(board u){
   // get user's column
   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
   // checks that the user input is numeric
-  // while(scanf("%d", &col) != 1){
-  //   // if not numeric we display the error message and re-prompt
-  //   int chr;
-  //   fprintf(stderr, "Error: Invalid input, please enter a number.\n");
-  //   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
-  //   do {
-  //     chr = getchar();
-  //   } while ((chr != EOF) && (chr != '\n'));
-  // }
   if(scanf("%d", &col) !=1){
     fprintf(stderr, "Error: Invalid input, column should be a number.\n");
+    cleanup_board(u);
     exit(1);
   }
 
   // get user's row
   printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
   // checks that the user input is numeric
-  // while(scanf("%d", &row) != 1){
-  //   // if not numeric we display the error message and re-prompt
-  //   int chr;
-  //   fprintf(stderr, "Error: Invalid input, please enter a number.\n");
-  //   printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
-  //   do {
-  //       chr = getchar();
-  //   } while ((chr != EOF) && (chr != '\n'));
-  // }
   if(scanf("%d", &row) !=1){
     fprintf(stderr, "Error: Invalid input, row should be a number.\n");
+    cleanup_board(u);
     exit(1);
   }
   // create move struct
@@ -508,11 +492,12 @@ char is_winning_move(struct move m, board u){
   // copy actual board properties to temporary board
   temp_board->height = u->height;
   temp_board->width= u->width;
-  temp_board->rows = malloc(sizeof(u->rows));
+  temp_board->rows= malloc (512 * sizeof (char *));
+
+  // copy rows
   for (int i = 0; i < u->height; i++){
-    for(int j = 0; j <u->width;j++){
-      temp_board->rows[i][j] = u->rows[i][j];
-    }
+    char *chars = temp_board->rows[i];
+    strcpy(chars, u->rows[i]);
   }
 
   // check move is valid
