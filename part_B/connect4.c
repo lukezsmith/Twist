@@ -405,10 +405,10 @@ char current_winner(board u){
 
   // check for winners and return the winner's character
   if(x_win == 1 && o_win == 0){
-    return 'X';
+    return 'x';
   }
   if(x_win == 0 && o_win == 1){
-    return 'O';
+    return 'o';
   }
   if(x_win == 1 && o_win == 1){
     return 'd';
