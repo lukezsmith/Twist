@@ -466,7 +466,6 @@ int is_valid_move(struct move m, board u){
 
   // check column is valid
   if(m.column > u->width+1 || m.column < 1 || abs(m.row) > u->height){
-    fprintf(stderr, "Error: Not a valid move.\n");
     return 0;
   }else{
     // find next available slot in selected column
@@ -478,7 +477,6 @@ int is_valid_move(struct move m, board u){
       }
     }
     // if no space return false
-    fprintf(stderr, "Error: Not a valid move.\n");
     return 0;
   }
 }
@@ -504,12 +502,10 @@ char is_winning_move(struct move m, board u){
   if(is_valid_move(m, temp_board)){
     // play move
     play_move(m,temp_board);
-    printf("temp_board: %dx%d \n", temp_board->height, temp_board->width);
     write_out_file(stdout, temp_board);
 
     // check if move yields a winner
     char winner = current_winner(temp_board);
-    printf("winner: %c\n", winner);
 
     // if winner is . it could currently be a draw OR there is no winner yet
     if (winner == '.'){
