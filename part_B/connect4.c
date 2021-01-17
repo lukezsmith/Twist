@@ -64,7 +64,7 @@ void read_in_file(FILE *infile, board u){
 
   // check input file is valid
   if (infile == NULL) {
-    fprintf (stderr, "Error: Can't open input file.\n");
+    fprintf(stderr, "Error: Can't open input file.\n");
     cleanup_board(u);
     exit(1);
   }
@@ -323,9 +323,9 @@ char next_player(board u){
 // function that returns the current winner of the board
 char current_winner(board u){
   // variable that indicates if there is a free space on the board or not
-  int emptySpace = 1;
+  int empty_space = 1;
   // array containing the winning player's tokens
-  char symbols[] =  {'X', 'O'};
+  char symbols[] =  {'x', 'o'};
   // flag to register a winning line for each player
   int x_win = 0;
   int o_win = 0;
@@ -339,7 +339,7 @@ char current_winner(board u){
     for (int j = 0; j<u->width; j++ ){
       for (int i = 0; i<u->height; i++){
         // check if each respective board position is the same: i.e four in a row
-        if (u->rows[i][j] == symbols[k] && u->rows[i][(j+1) % u->width] == symbols[k] && u->rows[i][(j+2)% u->width] == symbols[k] && u->rows[i][(j+3) % u->width] == symbols[k]){
+        if (tolower(u->rows[i][j]) == symbols[k] && tolower(u->rows[i][(j+1) % u->width]) == symbols[k] && tolower(u->rows[i][(j+2)% u->width]) == symbols[k] && tolower(u->rows[i][(j+3) % u->width]) == symbols[k]){
           // if x win 
           if (k == 0){
             x_win = 1;
@@ -356,7 +356,7 @@ char current_winner(board u){
     for (int i = 0; i<u->height-3; i++ ){
       for (int j = 0; j<u->width; j++){
         // check if each respective board position is the same: i.e four in a row
-        if (u->rows[i][j] == symbols[k] && u->rows[i+1][j] == symbols[k] && u->rows[i+2][j] == symbols[k] && u->rows[i+3][j] == symbols[k]){
+        if (tolower(u->rows[i][j]) == symbols[k] && tolower(u->rows[i+1][j]) == symbols[k] && tolower(u->rows[i+2][j]) == symbols[k] && tolower(u->rows[i+3][j]) == symbols[k]){
           // if x win 
           if (k == 0){
             x_win = 1;
@@ -373,7 +373,7 @@ char current_winner(board u){
     for (int i=3; i<u->height; i++){
       for (int j=0; j<u->width; j++){
         // check if each respective board position is the same: i.e four in a row
-        if (u->rows[i][j] == symbols[k] && u->rows[i-1][(j+1)% u->width] == symbols[k] && u->rows[i-2][(j+2)% u->width] == symbols[k] && u->rows[i-3][(j+3)% u->width] == symbols[k]){
+        if (tolower(u->rows[i][j]) == symbols[k] && tolower(u->rows[i-1][(j+1)% u->width]) == symbols[k] && tolower(u->rows[i-2][(j+2)% u->width]) == symbols[k] && tolower(u->rows[i-3][(j+3)% u->width]) == symbols[k]){
           // if x win 
           if (k == 0){
             x_win = 1;
@@ -390,7 +390,7 @@ char current_winner(board u){
     for (int i=3; i<u->height; i++){
       for (int j=0; j< u->width; j++){
         // check if each respective board position is the same: i.e four in a row
-        if (u->rows[i][j] == symbols[k] && u->rows[i-1][(unsigned int)(j-1)% u->width] == symbols[k] && u->rows[i-2][(unsigned int)(j-2)% u->width] ==symbols[k] && u->rows[i-3][(unsigned int)(j-3)% u->width] == symbols[k]){
+        if (tolower(u->rows[i][j]) == symbols[k] && tolower(u->rows[i-1][(unsigned int)(j-1)% u->width]) == symbols[k] && tolower(u->rows[i-2][(unsigned int)(j-2)% u->width]) ==symbols[k] && tolower(u->rows[i-3][(unsigned int)(j-3)% u->width]) == symbols[k]){
           // if x win 
           if (k == 0){
             x_win = 1;
@@ -419,12 +419,12 @@ char current_winner(board u){
     for (int j = 0; j < u->width; j++){
       if (u->rows[i][j] == '.'){
         // there is an available slot
-        emptySpace = 0;
+        empty_space = 0;
       }
     }
   }
   // if no empty slots it is a draw
-  if (emptySpace == 1){
+  if (empty_space == 1){
     return 'd';
   }
   // else no winners and there is a space to place token in
@@ -440,27 +440,35 @@ struct move read_in_move(board u){
   // get user's column
   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
   // checks that the user input is numeric
-  while(scanf("%d", &col) != 1){
-    // if not numeric we display the error message and re-prompt
-    int chr;
-    fprintf(stderr, "Error: Invalid input, please enter a number.\n");
-    printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
-    do {
-      chr = getchar();
-    } while ((chr != EOF) && (chr != '\n'));
+  // while(scanf("%d", &col) != 1){
+  //   // if not numeric we display the error message and re-prompt
+  //   int chr;
+  //   fprintf(stderr, "Error: Invalid input, please enter a number.\n");
+  //   printf("Player %c enter column to place your token: ",next_player(u)); //Do not edit this line
+  //   do {
+  //     chr = getchar();
+  //   } while ((chr != EOF) && (chr != '\n'));
+  // }
+  if(scanf("%d", &col) !=1){
+    fprintf(stderr, "Error: Invalid input, column should be a number.\n");
+    exit(1);
   }
 
   // get user's row
   printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
   // checks that the user input is numeric
-  while(scanf("%d", &row) != 1){
-    // if not numeric we display the error message and re-prompt
-    int chr;
-    fprintf(stderr, "Error: Invalid input, please enter a number.\n");
-    printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
-    do {
-        chr = getchar();
-    } while ((chr != EOF) && (chr != '\n'));
+  // while(scanf("%d", &row) != 1){
+  //   // if not numeric we display the error message and re-prompt
+  //   int chr;
+  //   fprintf(stderr, "Error: Invalid input, please enter a number.\n");
+  //   printf("Player %c enter row to rotate: ",next_player(u)); // Do not edit this line
+  //   do {
+  //       chr = getchar();
+  //   } while ((chr != EOF) && (chr != '\n'));
+  // }
+  if(scanf("%d", &row) !=1){
+    fprintf(stderr, "Error: Invalid input, row should be a number.\n");
+    exit(1);
   }
   // create move struct
   struct move my_move;
@@ -494,43 +502,54 @@ int is_valid_move(struct move m, board u){
 // function that checks if the specified move will result in a win, draw or otherwise
 char is_winning_move(struct move m, board u){
   // create a temporary board structure
-  struct board_structure *tempBoard;
-  tempBoard = (struct board_structure *) malloc(sizeof(struct board_structure));
+  struct board_structure *temp_board;
+  temp_board = (struct board_structure *) malloc(sizeof(struct board_structure));
 
   // copy actual board properties to temporary board
-  tempBoard->height = u->height;
-  tempBoard->width= u->width;
-  tempBoard->rows = malloc(u->height * sizeof(char *));
-  tempBoard->rows = u->rows;
+  temp_board->height = u->height;
+  temp_board->width= u->width;
+  temp_board->rows = malloc(sizeof(u->rows));
+  for (int i = 0; i < u->height; i++){
+    for(int j = 0; j <u->width;j++){
+      temp_board->rows[i][j] = u->rows[i][j];
+    }
+  }
 
   // check move is valid
-  if(is_valid_move(m, tempBoard)){
+  if(is_valid_move(m, temp_board)){
     // play move
-    play_move(m,tempBoard);
+    play_move(m,temp_board);
+    printf("temp_board: %dx%d \n", temp_board->height, temp_board->width);
+    write_out_file(stdout, temp_board);
 
     // check if move yields a winner
-    char winner = current_winner(tempBoard);
+    char winner = current_winner(temp_board);
+    printf("winner: %c\n", winner);
 
     // if winner is . it could currently be a draw OR there is no winner yet
     if (winner == '.'){
       // find next available slot in selected column
-      for (int i = 0; i < tempBoard->height; i++){
-        for (int j = 0; j < tempBoard->width; j++){ 
-          if (tempBoard->rows[i][j] == '.'){
+      for (int i = 0; i < temp_board->height; i++){
+        for (int j = 0; j < temp_board->width; j++){ 
+          if (temp_board->rows[i][j] == '.'){
             // there is an available slot
+            cleanup_board(temp_board);
             return '.';
           }
         }
       }
       // if no space found we return that the move results in a draw
+      cleanup_board(temp_board);
       return 'd';
     }else{
       // else there is a winner and we return the winner's token
+      cleanup_board(temp_board);
       return winner;
     }
 
   }else{
     // invalid move so no one wins/draws
+    cleanup_board(temp_board);
     return '.';
   }
 }
@@ -550,23 +569,23 @@ void play_move(struct move m, board u){
     // if rightward twist
     if (m.row > 0){
       // temporarily store last column token
-      char tempData  = u->rows[u->height-abs(m.row)][u->width-1];
+      char temp_data  = u->rows[u->height-abs(m.row)][u->width-1];
       // shift each column to the right by one position
       for (int i= u->width-1; i >0; i--){
         u->rows[u->height-abs(m.row)][i] = u->rows[u->height-abs(m.row)][i-1]; 
       }
       // place the previous rightmost token in the first column
-      u->rows[u->height-abs(m.row)][0] = tempData;
+      u->rows[u->height-abs(m.row)][0] = temp_data;
     }else{
       // if leftward twist
       // temporarily store first column token
-      char tempData  = u->rows[u->height-abs(m.row)][0];
+      char temp_data  = u->rows[u->height-abs(m.row)][0];
       // shift each column to the left by one position
       for (int i= 0; i < u->width-1; i++){
         u->rows[u->height-abs(m.row)][i] = u->rows[u->height-abs(m.row)][i+1]; 
       }
       // place the previous first column token in the rightmost column
-      u->rows[u->height-abs(m.row)][u->width-1] = tempData;
+      u->rows[u->height-abs(m.row)][u->width-1] = temp_data;
     }
 
     // handle token gravity
@@ -579,10 +598,10 @@ void play_move(struct move m, board u){
             if(u->rows[k][j] == '.'){
               // bubble . upwards k places by switching tokens
               for(int l = 0; l < k; l++){
-                char tempA = u->rows[k-l][j];
-                char tempB = u->rows[(k-l)-1][j];
-                u->rows[k-l][j] = tempB; 
-                u->rows[(k-l)-1][j] = tempA; 
+                char temp_a = u->rows[k-l][j];
+                char temp_b = u->rows[(k-l)-1][j];
+                u->rows[k-l][j] = temp_b; 
+                u->rows[(k-l)-1][j] = temp_a; 
               }
             }
           }

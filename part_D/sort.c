@@ -4,8 +4,9 @@
 #include <ctype.h>
 #include <locale.h>
 
-#include "sort.h"
-
+// function definitions
+void process_file(FILE* fp, char sort_type, char output_type, int reverse, char* output_filename);
+void write_to_file(char* filename, char* lines, int n);
 
 // function that prints usage and brief overview to command line
 void display_usage_info(){
