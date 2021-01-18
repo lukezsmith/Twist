@@ -37,28 +37,8 @@ int numeric_compare_function(const void * a, const void * b) {
   char *pa;
   char *pb;
 
-  // pa = (char*) a;
-  // pb = (char*) b;
-
-  // char ca = pa[0];
-  // char cb = pb[0];
-  // printf("first char a: %c\n", ca);
-
-
   int a_numeric = (int) strtol(a, &pa , 10);
-  // printf("character: %s, integer val: %d\n", a, a_numeric);
-  // printf("numeric: %d\n", a_numeric);
   int b_numeric = (int) strtol(b, &pb, 10);
-  // printf("character: %s, integer val: %d\n", b, b_numeric);
-  // char ca = (char *) *a[0];
-  // char cb = (char *) *b[0];
-  // const char* *ca = a;
-  // const char* *cb = b;
-
-  // int a_numeric = atoi(&ca);
-  // printf("character: %c, integer val: %d\n", ca, a_numeric);
-  // int b_numeric = atoi(&cb);
-  // printf("character: %c, integer val: %d\n", cb,b_numeric);
 
   return (a_numeric - b_numeric);
 }
@@ -102,7 +82,7 @@ int main(int argc, char *argv[]){
       switch ((*argv)[1]){
         // fallback option when flag not found
         default: 
-          printf("Unknown option -%c\n\n", (*argv)[1]);
+          fprintf(stderr, "Error: Unknown option -%c\n\n", (*argv)[1]);
           display_usage_info();
           exit(1);
         
@@ -140,8 +120,8 @@ int main(int argc, char *argv[]){
           switch ((*argv)[2]){
             // fallback option when flag not found
             default: 
-              printf("sort: unrecognized option '--%c'\n", (*argv)[2]);
-              printf("Try './sort -h for more information.\n");
+              fprintf(stderr, "Error: unrecognized option '--%c'\n", (*argv)[2]);
+              fprintf(stderr, "Try './sort -h for more information.\n");
               exit(1);
             
             // usage flag
@@ -243,7 +223,7 @@ void process_file(FILE* fp, char sort_type, char output_type, int reverse, char*
       void *tmp = realloc (input, 2 * max_lines * sizeof *input);
       // check that the allocation was possible
       if (!tmp) {
-        fprintf (stderr, "Error: Insufficient memory to store board.\n");
+        fprintf (stderr, "Error: Insufficient memory to store text input.\n");
         exit(1);
       }
       // assign larger memory block to input
@@ -287,7 +267,6 @@ void process_file(FILE* fp, char sort_type, char output_type, int reverse, char*
     FILE *f;
     // check file 
     if ((f = fopen(output_filename, "w")) == NULL) {
-      // printf("Can't open file %s\n", output_filename);
       fprintf (stderr, "Error: Can't open file %s\n", output_filename);
       exit(1);
     }
