@@ -1,8 +1,0 @@
-Alphabet
-apple
-Zebra
-banana
-1
-2
-7
-3

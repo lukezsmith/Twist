@@ -1,16 +1,17 @@
-#include<stdio.h>
-#include"connect4.h"
+#include <stdio.h>
+#include "connect4.h"
+
 int main(){
   FILE *infile,*outfile;
 
   board my_board=setup_board();
-  infile=fopen("initial_board.txt","r");
-  // infile=fopen("./test_board_files/draw_board.txt","r");
+  infile=fopen("../initial_board.txt","r");
   read_in_file(infile,my_board);
   fclose(infile);
 
   write_out_file(stdout,my_board);
    
+  // while no winner
   while(current_winner(my_board)=='.') {
     struct move next_move = read_in_move(my_board);
     if (is_valid_move(next_move,my_board)) {
@@ -19,10 +20,11 @@ int main(){
     }
   }
 
-  outfile=fopen("final_board.txt","w");
+  outfile=fopen("../final_board.txt","w");
   write_out_file(outfile,my_board);
   fclose(outfile);
 
+  // free memory
   cleanup_board(my_board);
   return 0;
 }

@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include"connect4.h"
+#include "connect4.h"
+#include <unistd.h>
+
 
 // structure that stores the board
 struct board_structure {
@@ -589,5 +591,3 @@ void play_move(struct move m, board u){
     }
   }
 }
-
-//You may put additional functions here if you wish.
